@@ -1,0 +1,3 @@
+[submodule "autonomy-host-protocol"]
+	path = autonomy-host-protocol
+	url = ssh://git@gitlab.bringauto.com:1999/bringauto-public/autonomy-host-protocol.git
