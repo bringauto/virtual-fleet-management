@@ -1,0 +1,9 @@
+.vscode
+*.mod
+*.sum
+main
+*.txt
+app
+*.zip
+*.log
+virtual-industrial-portal-app
