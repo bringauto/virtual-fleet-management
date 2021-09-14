@@ -21,6 +21,7 @@ var Client = MQTTClient{}
 var vehicles = []*Vehicle{
 	NewVehicle("roboauto/kralovopolska/car1", []string{"Spec. aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"}),
 	NewVehicle("faulhorn/borsodchem/car1", []string{"Spec. aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"}),
+	NewVehicle("bringauto/default/car1", []string{"Spec. aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"}),
 }
 
 func (mqttClient *MQTTClient) Start(server, username, password string) {
