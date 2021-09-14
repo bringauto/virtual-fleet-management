@@ -56,8 +56,8 @@ RetryLoop:
 			}
 		}
 	}
-
 }
+
 func (mqttClient *MQTTClient) mqttConnect() {
 	config := paho.ClientConfig{
 		Router: paho.NewSingleHandlerRouter(func(m *paho.Publish) {
