@@ -1,0 +1,10 @@
+{
+	"map": "borsodchem.osm",
+	"missions": [
+		{ "timestamp": "0"},
+		{"stops": [
+			{"name": "Lab A-blok"},
+			{"name": "Plnička"},
+		]}
+	]
+}
