@@ -15,6 +15,7 @@ type Vehicle struct {
 	stops, actualMission                          []string
 	timeoutTimer, responseTimer                   vehicleTimer
 	missionChanged								  bool
+	scenario									  *Scenario
 }
 
 type vehicleTimer struct {
@@ -23,7 +24,7 @@ type vehicleTimer struct {
 	durationSec int
 }
 
-func NewVehicle(topic string, stopList []string) *Vehicle {
+func NewVehicle(topic string, stopList []string, scenario *Scenario) *Vehicle {
 	vehicle := new(Vehicle)
 	vehicle.daemonTopic = topic + "/daemon"
 	vehicle.industrialPortalTopic = topic + "/industrial_portal"
@@ -35,6 +36,7 @@ func NewVehicle(topic string, stopList []string) *Vehicle {
 	vehicle.timeoutTimer = vehicleTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 30}
 	vehicle.responseTimer = vehicleTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 10}
 	vehicle.missionChanged = true
+	vehicle.scenario = scenario
 	return vehicle
 }
 

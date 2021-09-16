@@ -5,12 +5,12 @@ import(
 )
 //"encoding/json"
 
-type scenario struct {
-	missions	[]mission
+type Scenario struct {
+	missions	[] Mission
 
 }
 
-type mission struct {
+type Mission struct {
 	fullStopList	[]string
 
 }

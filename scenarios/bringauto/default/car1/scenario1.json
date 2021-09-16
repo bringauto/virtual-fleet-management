@@ -1,10 +1,19 @@
 {
 	"map": "borsodchem.osm",
 	"missions": [
-		{ "timestamp": "0"},
-		{"stops": [
+		{
+		 "timestamp": "0",
+		 "stops": [
 			{"name": "Lab A-blok"},
-			{"name": "Plnička"},
-		]}
+			{"name": "Plnička"}
+			]
+		},
+		{
+	 	 "timestamp": "30",
+		 "stops": [
+			{"name": "Vodík"},
+			{"name": "Lab A-blok"}
+			]
+		}
 	]
 }

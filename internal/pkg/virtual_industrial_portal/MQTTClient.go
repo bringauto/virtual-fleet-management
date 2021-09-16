@@ -14,15 +14,16 @@ type MQTTClient struct {
 	msgChan                    chan *paho.Publish
 	server, username, password string
 	tcpCon                     net.Conn
+	vehicles				   []*Vehicle
 }
 
 var Client = MQTTClient{}
 
-var vehicles = []*Vehicle{
+/* var vehicles = []*Vehicle{
 	NewVehicle("roboauto/kralovopolska/car1", []string{"Spec. aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"}),
 	NewVehicle("faulhorn/borsodchem/car1", []string{"Spec. aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"}),
 	NewVehicle("bringauto/default/car1", []string{"Spec.fafsa aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"}),
-}
+} */
 
 func (mqttClient *MQTTClient) Start(server, username, password string) {
 	log.Printf("[INFO] Connecting to broker at %v\n", server)
@@ -116,7 +117,7 @@ func (mqttClient *MQTTClient) reconnectHandler() {
 			var message []byte
 			success := mqttClient.publish("conn/test", message)
 			if !success {
-				for _, vehicle := range vehicles {
+				for _, vehicle := range mqttClient.vehicles {
 					vehicle.resetVehicle()
 				}
 				mqttClient.tcpConnect()
@@ -129,7 +130,7 @@ func (mqttClient *MQTTClient) reconnectHandler() {
 
 func (mqttClient *MQTTClient) listen() {
 	for m := range mqttClient.msgChan {
-		for _, vehicle := range vehicles {
+		for _, vehicle := range mqttClient.vehicles {
 			if m.Topic == vehicle.daemonTopic {
 				vehicle.parseMessage(m.Payload)
 				continue
@@ -149,7 +150,7 @@ func (mqttClient *MQTTClient) Disconnect() {
 
 func (mqttClient *MQTTClient) subscribe() {
 	var qos = 2
-	for _, vehicle := range vehicles {
+	for _, vehicle := range mqttClient.vehicles {
 		daemonTopic := vehicle.daemonTopic
 		sa, err := mqttClient.client.Subscribe(context.Background(), &paho.Subscribe{
 			Subscriptions: map[string]paho.SubscribeOptions{
