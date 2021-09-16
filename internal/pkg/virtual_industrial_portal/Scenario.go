@@ -15,8 +15,10 @@ type Mission struct {
 
 }
 
-func NewScenario(){
+func NewScenario()*Scenario{
+	scenario := new(Scenario)
 	log.Println("[INFO] creating new scenario")
+	return scenario
 }
 
 func NewMission(){

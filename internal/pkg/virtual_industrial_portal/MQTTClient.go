@@ -34,6 +34,10 @@ func (mqttClient *MQTTClient) Start(server, username, password string) {
 
 	mqttClient.msgChan = make(chan *paho.Publish)
 
+	mqttClient.vehicles = append(mqttClient.vehicles, NewVehicle("roboauto/kralovopolska/car1", []string{"Spec. aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"}, NewScenario()))
+	mqttClient.vehicles = append(mqttClient.vehicles, NewVehicle("faulhorn/borsodchem/car1", []string{"Spec. aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"},NewScenario()))
+	mqttClient.vehicles = append(mqttClient.vehicles, NewVehicle("bringauto/default/car1", []string{"Spec.fafsa aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"}, NewScenario()))
+
 	mqttClient.tcpConnect()
 	mqttClient.mqttConnect()
 	mqttClient.subscribe()
