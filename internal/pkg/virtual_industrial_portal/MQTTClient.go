@@ -24,7 +24,7 @@ func (mqttClient *MQTTClient) Start(server, username, password string, scenarios
 
     defer func() {
         if r := recover(); r != nil {
-            log.Printf("Error occured in mqqtClient start: %v\n", r)
+            log.Printf("[ERROR] Error occured in mqqtClient start: %v\n", r)
         }
     }()
 

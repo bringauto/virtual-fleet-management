@@ -25,7 +25,7 @@ func main() {
 	var server = *brokerIp + ":" + *brokerPort
 	proto_helper.CreateMessageBinaries()
 	setSignalHandler()
-	ip.Client.Start(server, "", "", *scenariosPath + "/")
+	ip.Client.Start(server, "", "", *scenariosPath)
 }
 
 func setUpLogger(path string){
