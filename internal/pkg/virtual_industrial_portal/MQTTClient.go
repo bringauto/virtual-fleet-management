@@ -33,7 +33,8 @@ func (mqttClient *MQTTClient) Start(server, username, password string, scenarios
 
 	//todo parse json
 	for _, topic := range topics{
-		mqttClient.vehicles = append(mqttClient.vehicles, NewVehicle(topic, []string{"Spec. aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"}, NewScenario()))
+		scenario := GetScenario(topic, scenariosPath)
+		mqttClient.vehicles = append(mqttClient.vehicles, NewVehicle(topic, []string{"Spec. aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"}, scenario))
 	
 	}
 	

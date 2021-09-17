@@ -8,3 +8,9 @@ func GetListOfTopics(pathToScenarioFolder string) []string{
 	topics = append(topics, "bringauto/default/car1")
 	return topics
 }
+
+func GetScenario(topic, scenarioPath string) *Scenario{
+	//todo implement
+	scenario := NewScenario()
+	return scenario
+}
