@@ -41,7 +41,6 @@ func (mqttClient *MQTTClient) Start(server, username, password string, scenarios
 	for _, topic := range topics{
 		scenario := GetScenario(topic, scenariosPath)
 		mqttClient.vehicles = append(mqttClient.vehicles, NewVehicle(topic, []string{"Spec. aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"}, scenario))
-	
 	}
 	
 	mqttClient.tcpConnect()

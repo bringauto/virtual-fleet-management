@@ -1,8 +1,5 @@
 package virtual_industrial_portal
 
-import (
-	"log"
-)
 
 type ScenarioStruct struct {
 	Map      string `json:"map"`
@@ -22,6 +19,11 @@ type Scenario struct{
 func NewScenario(scenarioStructs []ScenarioStruct)*Scenario{
 	scenario := new(Scenario)
 	scenario.scenarioStructs = scenarioStructs
-	log.Printf("[INFO] creating new scenario %v\n", scenarioStructs)
 	return scenario
+}
+
+func (scenario Scenario)getCurentMission()[]string{
+	if(len(scenario.scenarioStructs) > 0){
+		return scenario.scenarioStructs[0].Missions[0].Stops
+	}
 }

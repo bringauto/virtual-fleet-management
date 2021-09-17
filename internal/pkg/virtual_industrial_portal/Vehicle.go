@@ -24,7 +24,7 @@ type vehicleTimer struct {
 	durationSec int
 }
 
-func NewVehicle(topic string, stopList []string, scenario *Scenario) *Vehicle {
+func NewVehicle(topic string, scenario *Scenario) *Vehicle {
 	vehicle := new(Vehicle)
 	vehicle.daemonTopic = topic + "/daemon"
 	vehicle.industrialPortalTopic = topic + "/industrial_portal"
@@ -37,6 +37,10 @@ func NewVehicle(topic string, stopList []string, scenario *Scenario) *Vehicle {
 	vehicle.responseTimer = vehicleTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 10}
 	vehicle.missionChanged = true
 	vehicle.scenario = scenario
+
+	for _, scenario := range vehicle.scenario.scenarioStructs{
+		log.Printf("[INFO] Vehicle creation: %v %v\n",topic, scenario)
+	}
 	return vehicle
 }
 

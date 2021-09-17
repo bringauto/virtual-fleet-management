@@ -20,7 +20,7 @@ func GetListOfTopics(pathToScenarioFolder string) []string{
 			}
 		}
 	}
-	log.Printf("[INFO] found topics: %v\n", topics)
+	log.Printf("[INFO] Parsed topics: %v\n", topics)
     
 	return topics
 }
@@ -46,7 +46,7 @@ func GetScenario(topic, scenarioPath string) *Scenario{
 	}
 
 
-	log.Printf("[INFO] Found scenario files %v for %v\n", files, topic);
+	log.Printf("[INFO] Found scenario files %v for %v, creating scenario %v\n", files, topic, scenarioStructs);
 	scenario := NewScenario(scenarioStructs)
 	return scenario
 }
