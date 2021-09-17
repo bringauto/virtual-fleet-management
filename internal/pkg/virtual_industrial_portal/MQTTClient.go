@@ -19,13 +19,7 @@ type MQTTClient struct {
 
 var Client = MQTTClient{}
 
-/* var vehicles = []*Vehicle{
-	NewVehicle("roboauto/kralovopolska/car1", []string{"Spec. aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"}),
-	NewVehicle("faulhorn/borsodchem/car1", []string{"Spec. aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"}),
-	NewVehicle("bringauto/default/car1", []string{"Spec.fafsa aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"}),
-} */
-
-func (mqttClient *MQTTClient) Start(server, username, password string) {
+func (mqttClient *MQTTClient) Start(server, username, password string, scenariosPath string) {
 	log.Printf("[INFO] Connecting to broker at %v\n", server)
 
 	mqttClient.server = server
@@ -34,10 +28,15 @@ func (mqttClient *MQTTClient) Start(server, username, password string) {
 
 	mqttClient.msgChan = make(chan *paho.Publish)
 
-	mqttClient.vehicles = append(mqttClient.vehicles, NewVehicle("roboauto/kralovopolska/car1", []string{"Spec. aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"}, NewScenario()))
-	mqttClient.vehicles = append(mqttClient.vehicles, NewVehicle("faulhorn/borsodchem/car1", []string{"Spec. aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"},NewScenario()))
-	mqttClient.vehicles = append(mqttClient.vehicles, NewVehicle("bringauto/default/car1", []string{"Spec.fafsa aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"}, NewScenario()))
 
+	topics := GetListOfTopics(scenariosPath)
+
+	//todo parse json
+	for _, topic := range topics{
+		mqttClient.vehicles = append(mqttClient.vehicles, NewVehicle(topic, []string{"Spec. aminy 2", "Plnička", "KD6", "Lab A-blok", "Deox"}, NewScenario()))
+	
+	}
+	
 	mqttClient.tcpConnect()
 	mqttClient.mqttConnect()
 	mqttClient.subscribe()
