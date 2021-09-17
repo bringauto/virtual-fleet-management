@@ -22,6 +22,12 @@ var Client = MQTTClient{}
 func (mqttClient *MQTTClient) Start(server, username, password string, scenariosPath string) {
 	log.Printf("[INFO] Connecting to broker at %v\n", server)
 
+    defer func() {
+        if r := recover(); r != nil {
+            log.Printf("Error occured in mqqtClient start: %v\n", r)
+        }
+    }()
+
 	mqttClient.server = server
 	mqttClient.username = username
 	mqttClient.password = password
