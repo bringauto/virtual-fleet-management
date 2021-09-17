@@ -1,9 +1,11 @@
 package virtual_industrial_portal
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"path/filepath"
 )
 
 func GetListOfTopics(pathToScenarioFolder string) []string{
@@ -25,16 +27,40 @@ func GetListOfTopics(pathToScenarioFolder string) []string{
 
 func GetScenario(topic, scenarioPath string) *Scenario{
 	dirs, files := getListsOfDirsAndFiles(scenarioPath + "/" + topic)
-
+	var scenarioStructs []ScenarioStruct
 	if(len(dirs) != 0){
 		panic(fmt.Sprintf("Scenario folder for topic %v contains dir: %v\n", topic, dirs))
 	}
 
-	//todo for each
+	for _, file := range files{
+		filePath := scenarioPath + "/" + topic + "/" + file
+
+		matched, err := filepath.Match("*.json", filepath.Base(filePath))
+		if err != nil {
+            panic("Failed to match filename " + err.Error())
+        } else if matched {	
+			scenarioStructs = append(scenarioStructs, parseJson(filePath))
+        }else{
+			log.Printf("[WARNING] %v is not json file, ignoring\n", filePath)
+		}
+	}
+
 
 	log.Printf("[INFO] Found scenario files %v for %v\n", files, topic);
-	scenario := NewScenario()
+	scenario := NewScenario(scenarioStructs)
 	return scenario
+}
+
+func parseJson(path string)(scenarioStruct ScenarioStruct){
+	
+	file, _ := ioutil.ReadFile(path)
+	err := json.Unmarshal([]byte(file), &scenarioStruct)
+
+	if(err != nil){
+		panic("Unable to parse json file: " + path + " error: " + err.Error())
+	}
+
+	return scenarioStruct
 }
 
 func getListsOfDirsAndFiles(path string)(dirs, files []string){

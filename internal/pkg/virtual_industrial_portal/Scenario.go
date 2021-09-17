@@ -1,26 +1,27 @@
 package virtual_industrial_portal
 
-import(
+import (
 	"log"
 )
-//"encoding/json"
 
-type Scenario struct {
-	missions	[] Mission
-
+type ScenarioStruct struct {
+	Map      string `json:"map"`
+	Missions []struct {
+		Timestamp string `json:"timestamp"`
+		Stops     []struct {
+			Name string `json:"name"`
+		} `json:"stops"`
+	} `json:"missions"`
 }
 
-type Mission struct {
-	fullStopList	[]string
-
+type Scenario struct{
+	scenarioStructs []ScenarioStruct
 }
 
-func NewScenario()*Scenario{
+
+func NewScenario(scenarioStructs []ScenarioStruct)*Scenario{
 	scenario := new(Scenario)
-	log.Println("[INFO] creating new scenario")
+	scenario.scenarioStructs = scenarioStructs
+	log.Printf("[INFO] creating new scenario %v\n", scenarioStructs)
 	return scenario
-}
-
-func NewMission(){
-	log.Println("[INFO] creating new mission")
 }
