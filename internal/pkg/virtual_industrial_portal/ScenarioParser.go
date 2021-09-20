@@ -25,7 +25,7 @@ func GetListOfTopics(pathToScenarioFolder string) []string{
 	return topics
 }
 
-func GetScenario(topic, scenarioPath string) *Scenario{
+func GetScenario(topic, scenarioPath string, loop bool) *Scenario{
 	dirs, files := getListsOfDirsAndFiles(scenarioPath + "/" + topic)
 	var scenarioStruct ScenarioStruct
 	if(len(dirs) != 0){
@@ -52,7 +52,7 @@ func GetScenario(topic, scenarioPath string) *Scenario{
 
 
 	log.Printf("[INFO] Found scenario files %v for %v, creating scenario %v %v\n", files, topic, scenarioStruct.Map, scenarioStruct.Missions);
-	scenario := NewScenario(scenarioStruct)
+	scenario := NewScenario(scenarioStruct, topic, loop)
 	return scenario
 }
 

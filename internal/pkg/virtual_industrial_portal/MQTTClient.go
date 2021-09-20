@@ -19,7 +19,7 @@ type MQTTClient struct {
 
 var Client = MQTTClient{}
 
-func (mqttClient *MQTTClient) Start(server, username, password string, scenariosPath string) {
+func (mqttClient *MQTTClient) Start(server, username, password string, scenariosPath string, loop bool) {
 	log.Printf("[INFO] Connecting to broker at %v\n", server)
 
     defer func() {
@@ -39,7 +39,7 @@ func (mqttClient *MQTTClient) Start(server, username, password string, scenarios
 
 	//todo parse json
 	for _, topic := range topics{
-		scenario := GetScenario(topic, scenariosPath)
+		scenario := GetScenario(topic, scenariosPath, loop)
 		mqttClient.vehicles = append(mqttClient.vehicles, NewVehicle(topic, scenario))
 	}
 	
