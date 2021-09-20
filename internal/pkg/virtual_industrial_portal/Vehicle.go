@@ -12,9 +12,9 @@ type Vehicle struct {
 	daemonTopic, industrialPortalTopic, sessionId string
 	connectionState                               int
 	vehicleState                                  pb.CarStatus_State
-	stops, actualMission                          []string
+	//stops, actualMission                          []string
 	timeoutTimer, responseTimer                   vehicleTimer
-	missionChanged								  bool
+	//missionChanged								  bool
 	scenario									  *Scenario
 }
 
@@ -31,16 +31,16 @@ func NewVehicle(topic string, scenario *Scenario) *Vehicle {
 	vehicle.sessionId = ""
 	vehicle.connectionState = CONNECTION_DISCONNECTED
 	vehicle.vehicleState = pb.CarStatus_ERROR
-	vehicle.stops = stopList
-	vehicle.actualMission = stopList
+	//vehicle.stops = stopList
+	//vehicle.actualMission = stopList
 	vehicle.timeoutTimer = vehicleTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 30}
 	vehicle.responseTimer = vehicleTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 10}
-	vehicle.missionChanged = true
+	//vehicle.missionChanged = true
 	vehicle.scenario = scenario
 
-	for _, scenario := range vehicle.scenario.scenarioStructs{
+/* 	for _, scenario := range vehicle.scenario.scenarioStructs{
 		log.Printf("[INFO] Vehicle creation: %v %v\n",topic, scenario)
-	}
+	} */
 	return vehicle
 }
 
@@ -120,7 +120,7 @@ func (vehicle *Vehicle) parseStatus(message *pb.Status) {
 			doneStops = append(doneStops, stop.To)
 
 		}
-		log.Printf("[WARNING] received server error with stops: %v, mission is: %v in connection in %v, sessionID: %v\n", doneStops, vehicle.actualMission, vehicle.daemonTopic, vehicle.sessionId)
+		log.Printf("[WARNING] received server error with stops: %v, mission is: %v in connection in %v, sessionID: %v\n", doneStops, vehicle.scenario.getStopList(), vehicle.daemonTopic, vehicle.sessionId)
 		for _, stop := range doneStops {
 			vehicle.markStopAsDone(stop)
 		}
@@ -136,24 +136,22 @@ func (vehicle *Vehicle) parseStatus(message *pb.Status) {
 	vehicle.vehicleState = message.CarStatus.State
 
 	//reset mission
-	if(len(vehicle.actualMission) == 0){
+	if(len(vehicle.scenario.getStopList()) == 0){
 		vehicle.resetMission()
 	}
 
-	if(vehicle.missionChanged){
+	if(vehicle.scenario.missionChanged){
 		vehicle.sendCommand()
 	}
 }
 
 func (vehicle *Vehicle) resetMission(){
-	vehicle.actualMission = vehicle.stops
+	//vehicle.actualMission = vehicle.stops
 	log.Printf("[INFO] Vehicle finished its mission, reseting mission!\n")
-	vehicle.missionChanged = true
+	//vehicle.missionChanged = true
 }
 
 func (vehicle *Vehicle) parseCommandResponse(message *pb.CommandResponse) {
-	//log.Printf("[INFO] Received command response from %v, sessionID: %v\n", vehicle.daemonTopic, message.SessionId)
-
 	vehicle.connectionValidityCheck(message.SessionId, "command response")
 	vehicle.resetTimeoutTimer()
 
@@ -174,17 +172,17 @@ func (vehicle *Vehicle) connectionValidityCheck(receivedSessionId, messageType s
 }
 
 func (vehicle *Vehicle) markStopAsDone(stopToMark string) {
-	if stopToMark == vehicle.actualMission[0] {
+/* 	if stopToMark == vehicle.actualMission[0] {
 		vehicle.actualMission = vehicle.actualMission[1:]
 		vehicle.missionChanged = true
 	} else {
 		panic(fmt.Sprintf("Vehicle %s trying to mark wrong stop as done, received: %s, should be: %s", vehicle.daemonTopic, stopToMark, vehicle.stops[0]))
-	}
+	} */
 }
 
 func (vehicle *Vehicle) changeState(state int) {
 	vehicle.connectionState = state
-	vehicle.missionChanged = true
+	//vehicle.missionChanged = true
 	log.Printf("[INFO] Vehicle %v state changed to %v\n", vehicle.daemonTopic, connectionEnumToString(state))
 }
 
@@ -252,12 +250,11 @@ func (vehicle *Vehicle) sendConnectResponse(sessionId string, responseType pb.Co
 }
 
 func (vehicle *Vehicle) sendCommand() {
-	//todo print the command
-	log.Printf("[INFO] Sending command to %v, sessionID: %v, command: START, mission:%v\n", vehicle.industrialPortalTopic, vehicle.sessionId, vehicle.actualMission)
+	log.Printf("[INFO] Sending command to %v, sessionID: %v, command: START, mission:%v\n", vehicle.industrialPortalTopic, vehicle.sessionId, vehicle.scenario.getStopList())
 	vehicle.startResponseTimer()
-	var command = proto_helper.GetIndustrialPortalCommand(pb.CarCommand_START, vehicle.actualMission, vehicle.sessionId)
+	var command = proto_helper.GetIndustrialPortalCommand(pb.CarCommand_START, vehicle.scenario.getStopList(), vehicle.sessionId)
 	Client.publish(vehicle.industrialPortalTopic, command)
-	vehicle.missionChanged = false
+	//vehicle.missionChanged = false
 }
 
 func (vehicle *Vehicle) sendStatusResponse() {

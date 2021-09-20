@@ -27,9 +27,13 @@ func GetListOfTopics(pathToScenarioFolder string) []string{
 
 func GetScenario(topic, scenarioPath string) *Scenario{
 	dirs, files := getListsOfDirsAndFiles(scenarioPath + "/" + topic)
-	var scenarioStructs []ScenarioStruct
+	var scenarioStruct ScenarioStruct
 	if(len(dirs) != 0){
 		panic(fmt.Sprintf("Scenario folder for topic %v contains dir: %v\n", topic, dirs))
+	}
+
+	if(len(files) > 1){
+		log.Printf("[WARNING] multiple scenario files have been found, only first file will be run")
 	}
 
 	for _, file := range files{
@@ -39,15 +43,16 @@ func GetScenario(topic, scenarioPath string) *Scenario{
 		if err != nil {
             panic("Failed to match filename " + err.Error())
         } else if matched {	
-			scenarioStructs = append(scenarioStructs, parseJson(filePath))
+			scenarioStruct = parseJson(filePath)
+			break
         }else{
 			log.Printf("[WARNING] %v is not json file, ignoring\n", filePath)
 		}
 	}
 
 
-	log.Printf("[INFO] Found scenario files %v for %v, creating scenario %v\n", files, topic, scenarioStructs);
-	scenario := NewScenario(scenarioStructs)
+	log.Printf("[INFO] Found scenario files %v for %v, creating scenario %v %v\n", files, topic, scenarioStruct.Map, scenarioStruct.Missions);
+	scenario := NewScenario(scenarioStruct)
 	return scenario
 }
 
