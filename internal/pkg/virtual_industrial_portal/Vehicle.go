@@ -12,13 +12,11 @@ type Vehicle struct {
 	daemonTopic, industrialPortalTopic, sessionId string
 	connectionState                               int
 	vehicleState                                  pb.CarStatus_State
-	//stops, actualMission                          []string
-	timeoutTimer, responseTimer                   vehicleTimer
-	//missionChanged								  bool
+	timeoutTimer, responseTimer                   CancelableTimer
 	scenario									  *Scenario
 }
 
-type vehicleTimer struct {
+type CancelableTimer struct {
 	timer       *time.Timer
 	cancelTimer chan struct{}
 	durationSec int
@@ -31,16 +29,9 @@ func NewVehicle(topic string, scenario *Scenario) *Vehicle {
 	vehicle.sessionId = ""
 	vehicle.connectionState = CONNECTION_DISCONNECTED
 	vehicle.vehicleState = pb.CarStatus_ERROR
-	//vehicle.stops = stopList
-	//vehicle.actualMission = stopList
-	vehicle.timeoutTimer = vehicleTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 30}
-	vehicle.responseTimer = vehicleTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 10}
-	//vehicle.missionChanged = true
+	vehicle.timeoutTimer = CancelableTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 30}
+	vehicle.responseTimer = CancelableTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 10}
 	vehicle.scenario = scenario
-
-/* 	for _, scenario := range vehicle.scenario.scenarioStructs{
-		log.Printf("[INFO] Vehicle creation: %v %v\n",topic, scenario)
-	} */
 	return vehicle
 }
 
