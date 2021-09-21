@@ -3,6 +3,7 @@
 	"missions": [
 		{
 		 "timestamp": "0",
+		 "name": "mission1",
 		 "stops": [
 			{"name": "Lab A-blok"},
 			{"name": "Plnička"}
@@ -10,6 +11,7 @@
 		},
 		{
 	 	 "timestamp": "30",
+		 "name": "mission2",
 		 "stops": [
 			{"name": "Vodík"},
 			{"name": "Lab A-blok"}

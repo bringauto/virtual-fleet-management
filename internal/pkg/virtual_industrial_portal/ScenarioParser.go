@@ -29,11 +29,11 @@ func GetScenario(topic, scenarioPath string, loop bool) *Scenario{
 	dirs, files := getListsOfDirsAndFiles(scenarioPath + "/" + topic)
 	var scenarioStruct ScenarioStruct
 	if(len(dirs) != 0){
-		panic(fmt.Sprintf("Scenario folder for topic %v contains dir: %v\n", topic, dirs))
+		panic(fmt.Sprintf("[%v] Scenario folder contains dir: %v\n", topic, dirs))
 	}
 
 	if(len(files) > 1){
-		log.Printf("[WARNING] multiple scenario files have been found, only first file will be run")
+		log.Printf("[WARNING] [%v] Multiple scenario files have been found, only first file will be run", topic)
 	}
 
 	for _, file := range files{
@@ -41,17 +41,17 @@ func GetScenario(topic, scenarioPath string, loop bool) *Scenario{
 
 		matched, err := filepath.Match("*.json", filepath.Base(filePath))
 		if err != nil {
-            panic("Failed to match filename " + err.Error())
+            panic(fmt.Sprintf("[%v] Failed to match filename %v", topic, err.Error()))
         } else if matched {	
 			scenarioStruct = parseJson(filePath)
 			break
         }else{
-			log.Printf("[WARNING] %v is not json file, ignoring\n", filePath)
+			log.Printf("[WARNING] [%v] %v is not json file, ignoring\n", topic, filePath)
 		}
 	}
 
 
-	log.Printf("[INFO] Found scenario files %v for %v, creating scenario %v %v\n", files, topic, scenarioStruct.Map, scenarioStruct.Missions);
+	log.Printf("[INFO] [%v] Found scenario files %v, creating scenario %v %v\n",topic, files, scenarioStruct.Map, scenarioStruct.Missions);
 	scenario := NewScenario(scenarioStruct, topic, loop)
 	return scenario
 }
@@ -62,7 +62,7 @@ func parseJson(path string)(scenarioStruct ScenarioStruct){
 	err := json.Unmarshal([]byte(file), &scenarioStruct)
 
 	if(err != nil){
-		panic("Unable to parse json file: " + path + " error: " + err.Error())
+		panic(fmt.Sprintf("Unable to parse json file: %v error: %v", path, err.Error()))
 	}
 
 	return scenarioStruct
@@ -72,7 +72,7 @@ func getListsOfDirsAndFiles(path string)(dirs, files []string){
 	//var dirsList, files []string
     dirInfo, err := ioutil.ReadDir(path)
     if err != nil {
-        panic("Unable to access " + path)
+        panic(fmt.Sprintf("Unable to access %v", path))
     }
     for _, dir := range dirInfo {
 		if(dir.IsDir()){

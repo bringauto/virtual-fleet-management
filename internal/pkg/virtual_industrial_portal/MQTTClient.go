@@ -167,12 +167,12 @@ func (mqttClient *MQTTClient) subscribe() {
 			},
 		})
 		if err != nil {
-			log.Printf("Failed to subscribe to %s : %d\n", daemonTopic, err)
+			log.Printf("[ERROR] [%v] Failed to subscribe to deamon topic: %d\n", vehicle.scenario.topic, err)
 		}
 		if sa.Reasons[0] != byte(qos) {
-			log.Printf("Failed to subscribe to %s : %d\n", daemonTopic, sa.Reasons[0])
+			log.Printf("[ERROR] [%v] Failed to subscribe to deamon topic: %d\n",vehicle.scenario.topic, sa.Reasons[0])
 		}
-		log.Printf("[INFO] Subscribed to topic %s\n", daemonTopic)
+		log.Printf("[INFO] [%v] Subscribed to deamon topic\n", vehicle.scenario.topic)
 	}
 }
 
@@ -185,7 +185,7 @@ func (mqttClient *MQTTClient) publish(topic string, binaryMessage []byte) bool {
 	})
 
 	if err != nil {
-		log.Printf("[ERROR] error sending message:%v\n", err)
+		log.Printf("[ERROR] error sending message: %v\n", err)
 		return false
 	}
 	return true
