@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	//"proto_helper"
 	"syscall"
 	ip "virtual_industrial_portal"
 )
@@ -24,7 +23,6 @@ func main() {
 	flag.Parse()
 	setUpLogger(*logPath)
 	var server = *brokerIp + ":" + *brokerPort
-	//proto_helper.CreateMessageBinaries()
 	setSignalHandler()
 	ip.Client.Start(server, "", "", *scenariosPath, *loop)
 }
