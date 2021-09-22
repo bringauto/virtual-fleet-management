@@ -77,5 +77,5 @@ docker images
 ```
 and find image id of your docker container. Run the image using:
 ```
-docker run -ti --rm virtual-industrial-portal /virtual-industrial-portal/virtual-industrial-portal --broker-ip=<MQTT broker ipv4> --broker-port=<MQTT broker port>
+docker run -ti --rm virtual-industrial-portal /virtual-industrial-portal/virtual-industrial-portal --broker-ip=<MQTT broker ipv4> --broker-port=<MQTT broker port> scenario-dir=<path to scenario dir>
 ```
