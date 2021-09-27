@@ -11,6 +11,38 @@ This project serves as testing base for BA daemon. Virtual industrial portal imp
 
 ## Tests
 
+## Scenarios 
+Scenarios are stored in [virtual-industrial-portal](https://gitlab.bringauto.com/bring-auto/host-platform/virtual-industrial-portal) in folder scenarios in json format. Files are distributed  into folders depending on topics they will be used on. For example scenarios for topic bringauto/kralovopolska/car1 will be stored in virtual-industrial-portal/scenarios/bringauto/kralovopolska/car1/. Each car folder can contain multiple scenario files, but right now one scenario per car is supported, first correct file will be run and other files will be ignored
+
+### JSON format
+Json files contain information about map file that is used for missions (name or path to it) and list of missions. Each mission contain timestamp, name and list of stops. Timestamp informs the virtual industrial portal after how long period after establishing first connection of given car will be the mission started. Example:
+
+```
+{
+	"map": "borsodchem.osm",
+	"missions": [
+		{
+		 "timestamp": "0",
+                 "name":"mission1",
+		 "stops": [
+			{"name": "Lab A-blok"},
+			{"name": "Plnička"}
+			]
+		},
+		{
+	 	 "timestamp": "30",
+                 "name":"mission2",
+		 "stops": [
+			{"name": "Vodík"},
+			{"name": "Lab A-blok"}
+			]
+		}
+	]
+}
+```
+This scenario will play mission ["Lab A-blok", "Plnička" ] from map borsodchem.osm from timestamp 0 to 30 (calculated from fir connection with given car) and after that time interval it will switch to second mission  [ "Vodík", "Lab A-blok" ]
+
+
 
 ## Build and run project localy
 Run build script from project folder:
@@ -45,5 +77,5 @@ docker images
 ```
 and find image id of your docker container. Run the image using:
 ```
-docker run -ti --rm virtual-industrial-portal /virtual-industrial-portal/virtual-industrial-portal --broker-ip=<MQTT broker ipv4> --broker-port=<MQTT broker port>
+docker run -ti --rm virtual-industrial-portal /virtual-industrial-portal/virtual-industrial-portal --broker-ip=<MQTT broker ipv4> --broker-port=<MQTT broker port> scenario-dir=<path to scenario dir>
 ```

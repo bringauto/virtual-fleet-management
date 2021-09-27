@@ -20,3 +20,4 @@ go get proto_helper
 cd ./internal/app
 go build -o virtual-industrial-portal-app
 mv ./virtual-industrial-portal-app ../../virtual-industrial-portal-app
+mv /virtual-industrial-portal/tmp/scenarios /virtual-industrial-portal/
