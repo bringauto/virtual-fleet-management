@@ -12,29 +12,26 @@ type Vehicle struct {
 	daemonTopic, industrialPortalTopic, sessionId string
 	connectionState                               int
 	vehicleState                                  pb.CarStatus_State
-	stops, actualMission                          []string
-	timeoutTimer, responseTimer                   vehicleTimer
-	missionChanged								  bool
+	timeoutTimer, responseTimer                   CancelableTimer
+	scenario									  *Scenario
 }
 
-type vehicleTimer struct {
+type CancelableTimer struct {
 	timer       *time.Timer
 	cancelTimer chan struct{}
 	durationSec int
 }
 
-func NewVehicle(topic string, stopList []string) *Vehicle {
+func NewVehicle(topic string, scenario *Scenario) *Vehicle {
 	vehicle := new(Vehicle)
 	vehicle.daemonTopic = topic + "/daemon"
 	vehicle.industrialPortalTopic = topic + "/industrial_portal"
 	vehicle.sessionId = ""
 	vehicle.connectionState = CONNECTION_DISCONNECTED
 	vehicle.vehicleState = pb.CarStatus_ERROR
-	vehicle.stops = stopList
-	vehicle.actualMission = stopList
-	vehicle.timeoutTimer = vehicleTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 30}
-	vehicle.responseTimer = vehicleTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 10}
-	vehicle.missionChanged = true
+	vehicle.timeoutTimer = CancelableTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 30}
+	vehicle.responseTimer = CancelableTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 10}
+	vehicle.scenario = scenario
 	return vehicle
 }
 
@@ -47,7 +44,7 @@ const (
 func (vehicle *Vehicle) parseMessage(binaryMessage []byte) {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println("[ERROR] ", r)
+			log.Printf("[ERROR] [%v] %v",vehicle.scenario.topic, r)
 		}
 	}()
 
@@ -81,19 +78,19 @@ func (vehicle *Vehicle) parseConnect(message *pb.Connect) {
 
 	if vehicle.connectionState != CONNECTION_DISCONNECTED {
 		vehicle.sendConnectResponse(message.SessionId, pb.ConnectResponse_ALREADY_LOGGED)
-		panic(fmt.Sprintf("Vehicle %v is trying to connect to working session (received sessionID: %v, active sessionID: %v)", vehicle.daemonTopic, message.SessionId, vehicle.sessionId))
+		panic(fmt.Sprintf("Trying to connect to working session (received sessionID: %v, active sessionID: %v)", message.SessionId, vehicle.sessionId))
 	}
 
 	vehicle.resetTimeoutTimer()
 	vehicle.sessionId = message.SessionId
 	vehicle.changeState(CONNECTION_CONNECTING)
 	vehicle.sendConnectResponse(vehicle.sessionId, pb.ConnectResponse_OK)
-	log.Printf("[INFO] vehicle %v connected with session id %v\n", vehicle.daemonTopic, message.SessionId)
+	log.Printf("[INFO] [%v] Connected with session id %v\n", vehicle.daemonTopic, message.SessionId)
 }
 
 func (vehicle *Vehicle) parseStatus(message *pb.Status) {
-	log.Printf("[INFO] Received status from %v, sessionId %v (State: %v, Stop: %v, Lon: %v, Lat: %vm, Alt: %v, Speed: %vm/s, Fuel %v%%)\n",
-		vehicle.daemonTopic,
+	log.Printf("[INFO] [%v] Status received, sessionId %v (State: %v, Stop: %v, Lon: %v, Lat: %vm, Alt: %v, Speed: %vm/s, Fuel %v%%)\n",
+		vehicle.scenario.topic,
 		message.SessionId,
 		carStateEnumToString(message.CarStatus.State),
 		message.CarStatus.Stop.To,
@@ -114,13 +111,13 @@ func (vehicle *Vehicle) parseStatus(message *pb.Status) {
 			doneStops = append(doneStops, stop.To)
 
 		}
-		log.Printf("[WARNING] received server error with stops: %v, mission is: %v in connection in %v, sessionID: %v\n", doneStops, vehicle.actualMission, vehicle.daemonTopic, vehicle.sessionId)
+		log.Printf("[WARNING] [%v] Received server error with stops: %v, mission is: %v, sessionID: %v\n",vehicle.scenario.topic, doneStops, vehicle.scenario.getStopList(), vehicle.sessionId)
 		for _, stop := range doneStops {
-			vehicle.markStopAsDone(stop)
+			vehicle.scenario.markStopAsDone(stop)
 		}
 	case pb.Status_ServerError_OK:
 		if message.CarStatus.State == pb.CarStatus_IN_STOP && message.CarStatus.State != vehicle.vehicleState { //check for stop
-			vehicle.markStopAsDone(message.CarStatus.Stop.To)
+			vehicle.scenario.markStopAsDone(message.CarStatus.Stop.To)
 		}
 	}
 
@@ -129,25 +126,13 @@ func (vehicle *Vehicle) parseStatus(message *pb.Status) {
 	}
 	vehicle.vehicleState = message.CarStatus.State
 
-	//reset mission
-	if(len(vehicle.actualMission) == 0){
-		vehicle.resetMission()
-	}
-
-	if(vehicle.missionChanged){
+	if(vehicle.scenario.missionChanged){
 		vehicle.sendCommand()
 	}
 }
 
-func (vehicle *Vehicle) resetMission(){
-	vehicle.actualMission = vehicle.stops
-	log.Printf("[INFO] Vehicle finished its mission, reseting mission!\n")
-	vehicle.missionChanged = true
-}
 
 func (vehicle *Vehicle) parseCommandResponse(message *pb.CommandResponse) {
-	//log.Printf("[INFO] Received command response from %v, sessionID: %v\n", vehicle.daemonTopic, message.SessionId)
-
 	vehicle.connectionValidityCheck(message.SessionId, "command response")
 	vehicle.resetTimeoutTimer()
 
@@ -160,26 +145,16 @@ func (vehicle *Vehicle) parseCommandResponse(message *pb.CommandResponse) {
 
 func (vehicle *Vehicle) connectionValidityCheck(receivedSessionId, messageType string) {
 	if vehicle.connectionState == CONNECTION_DISCONNECTED {
-		panic(fmt.Sprintf("Received message (%v) from disconnected car (%v), received sessionID: %v", messageType, vehicle.daemonTopic, receivedSessionId))
+		panic(fmt.Sprintf("Received message (%v) from disconnected car, received sessionID: %v", messageType, receivedSessionId))
 	}
 	if vehicle.sessionId != receivedSessionId {
-		panic(fmt.Sprintf("Received message (%v) from %s with wrong session id (should be: %v is: %v)", messageType, vehicle.daemonTopic, vehicle.sessionId, receivedSessionId))
-	}
-}
-
-func (vehicle *Vehicle) markStopAsDone(stopToMark string) {
-	if stopToMark == vehicle.actualMission[0] {
-		vehicle.actualMission = vehicle.actualMission[1:]
-		vehicle.missionChanged = true
-	} else {
-		panic(fmt.Sprintf("Vehicle %s trying to mark wrong stop as done, received: %s, should be: %s", vehicle.daemonTopic, stopToMark, vehicle.stops[0]))
+		panic(fmt.Sprintf("Received message (%v) with wrong session id (should be: %v is: %v)", messageType, vehicle.sessionId, receivedSessionId))
 	}
 }
 
 func (vehicle *Vehicle) changeState(state int) {
 	vehicle.connectionState = state
-	vehicle.missionChanged = true
-	log.Printf("[INFO] Vehicle %v state changed to %v\n", vehicle.daemonTopic, connectionEnumToString(state))
+	log.Printf("[INFO] [%v] State changed to %v\n", vehicle.scenario.topic, connectionEnumToString(state))
 }
 
 func (vehicle *Vehicle) resetTimeoutTimer() {
@@ -192,7 +167,7 @@ func (vehicle *Vehicle) resetTimeoutTimer() {
 	go func() {
 		select {
 		case <-vehicle.timeoutTimer.timer.C:
-			log.Printf("[WARNING] Vehicle timeout! reseting vehicle %v\n", vehicle.industrialPortalTopic)
+			log.Printf("[WARNING] [%v] Vehicle timeout, reseting state!\n", vehicle.scenario.topic)
 			if vehicle.connectionState != CONNECTION_DISCONNECTED {
 				if vehicle.responseTimer.timer != nil {
 					vehicle.responseTimer.cancelTimer <- struct{}{}
@@ -200,7 +175,6 @@ func (vehicle *Vehicle) resetTimeoutTimer() {
 				vehicle.resetVehicle()
 			}
 		case <-vehicle.timeoutTimer.cancelTimer:
-			//log.Printf("[INFO] Deleting timeout timer for %s\n", vehicle.daemonTopic)
 			vehicle.timeoutTimer.timer = nil
 		}
 
@@ -217,7 +191,7 @@ func (vehicle *Vehicle) startResponseTimer() {
 	go func() {
 		select {
 		case <-vehicle.responseTimer.timer.C:
-			log.Printf("[WARNING] Vehicle %s failed to send command response\n", vehicle.daemonTopic)
+			log.Printf("[WARNING] [%s] Vehicle failed to send command response\n", vehicle.scenario.topic)
 			if vehicle.connectionState != CONNECTION_DISCONNECTED {
 				if vehicle.timeoutTimer.timer != nil {
 					vehicle.timeoutTimer.cancelTimer <- struct{}{}
@@ -225,7 +199,6 @@ func (vehicle *Vehicle) startResponseTimer() {
 				vehicle.resetVehicle()
 			}
 		case <-vehicle.responseTimer.cancelTimer:
-			//log.Printf("[INFO] Deleting response timer for %s\n", vehicle.daemonTopic)
 			vehicle.responseTimer.timer = nil
 		}
 	}()
@@ -246,12 +219,11 @@ func (vehicle *Vehicle) sendConnectResponse(sessionId string, responseType pb.Co
 }
 
 func (vehicle *Vehicle) sendCommand() {
-	//todo print the command
-	log.Printf("[INFO] Sending command to %v, sessionID: %v, command: START, mission:%v\n", vehicle.industrialPortalTopic, vehicle.sessionId, vehicle.actualMission)
+	log.Printf("[INFO] [%v] Sending command, sessionID: %v, command: START, mission:%v\n", vehicle.scenario.topic, vehicle.sessionId, vehicle.scenario.getStopList())
 	vehicle.startResponseTimer()
-	var command = proto_helper.GetIndustrialPortalCommand(pb.CarCommand_START, vehicle.actualMission, vehicle.sessionId)
+	var command = proto_helper.GetIndustrialPortalCommand(pb.CarCommand_START, vehicle.scenario.getStopList(), vehicle.sessionId)
 	Client.publish(vehicle.industrialPortalTopic, command)
-	vehicle.missionChanged = false
+	vehicle.scenario.markMissionAccepted()
 }
 
 func (vehicle *Vehicle) sendStatusResponse() {

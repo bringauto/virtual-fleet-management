@@ -9,4 +9,3 @@ RUN rm -r ./tmp
 EXPOSE 1883
 #port with ssl
 EXPOSE 8883
-CMD ["/virtual-industrial-portal/virtual-industrial-portal-app", "--broker-ip=127.0.0.1", " --broker-port=1883"]
