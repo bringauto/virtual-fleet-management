@@ -163,6 +163,7 @@ func (vehicle *Vehicle) resetTimeoutTimer() {
 
 	} else {
 		vehicle.timeoutTimer.timer.Reset(time.Duration(vehicle.timeoutTimer.durationSec) * time.Second)
+		log.Printf("Reseting timer!\n")
 	}
 	go func() {
 		select {
@@ -209,8 +210,10 @@ func (vehicle *Vehicle) resetVehicle() {
 	vehicle.changeState(CONNECTION_DISCONNECTED)
 	vehicle.sessionId = ""
 	vehicle.vehicleState = pb.CarStatus_ERROR
-	vehicle.timeoutTimer.timer = nil
-	vehicle.responseTimer.timer = nil
+	vehicle.timeoutTimer.cancelTimer <- struct{}{}
+	//vehicle.timeoutTimer.timer = nil
+	vehicle.responseTimer.cancelTimer <- struct{}{}
+	//vehicle.responseTimer.timer = nil
 }
 
 func (vehicle *Vehicle) sendConnectResponse(sessionId string, responseType pb.ConnectResponse_Type) {
