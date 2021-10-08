@@ -209,8 +209,8 @@ func (vehicle *Vehicle) resetVehicle() {
 	vehicle.changeState(CONNECTION_DISCONNECTED)
 	vehicle.sessionId = ""
 	vehicle.vehicleState = pb.CarStatus_ERROR
-	vehicle.timeoutTimer.timer = nil
-	vehicle.responseTimer.timer = nil
+	vehicle.timeoutTimer.cancelTimer <- struct{}{}
+	vehicle.responseTimer.cancelTimer <- struct{}{}
 }
 
 func (vehicle *Vehicle) sendConnectResponse(sessionId string, responseType pb.ConnectResponse_Type) {
