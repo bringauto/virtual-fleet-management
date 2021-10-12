@@ -123,6 +123,7 @@ func (vehicle *Vehicle) parseStatus(message *pb.Status) {
 
 	if vehicle.connectionState == CONNECTION_CONNECTING { //first status message
 		vehicle.changeState(CONNECTION_CONNECTED)
+		vehicle.scenario.missionChanged = true
 	}
 	vehicle.vehicleState = message.CarStatus.State
 
@@ -169,9 +170,6 @@ func (vehicle *Vehicle) resetTimeoutTimer() {
 		case <-vehicle.timeoutTimer.timer.C:
 			log.Printf("[WARNING] [%v] Vehicle timeout, reseting state!\n", vehicle.scenario.topic)
 			if vehicle.connectionState != CONNECTION_DISCONNECTED {
-				if vehicle.responseTimer.timer != nil {
-					vehicle.responseTimer.cancelTimer <- struct{}{}
-				}
 				vehicle.resetVehicle()
 			}
 		case <-vehicle.timeoutTimer.cancelTimer:
@@ -184,7 +182,6 @@ func (vehicle *Vehicle) resetTimeoutTimer() {
 func (vehicle *Vehicle) startResponseTimer() {
 	if vehicle.responseTimer.timer == nil {
 		vehicle.responseTimer.timer = time.NewTimer(time.Duration(vehicle.responseTimer.durationSec) * time.Second)
-
 	} else {
 		vehicle.responseTimer.timer.Reset(time.Duration(vehicle.responseTimer.durationSec) * time.Second)
 	}
@@ -193,9 +190,6 @@ func (vehicle *Vehicle) startResponseTimer() {
 		case <-vehicle.responseTimer.timer.C:
 			log.Printf("[WARNING] [%s] Vehicle failed to send command response\n", vehicle.scenario.topic)
 			if vehicle.connectionState != CONNECTION_DISCONNECTED {
-				if vehicle.timeoutTimer.timer != nil {
-					vehicle.timeoutTimer.cancelTimer <- struct{}{}
-				}
 				vehicle.resetVehicle()
 			}
 		case <-vehicle.responseTimer.cancelTimer:
