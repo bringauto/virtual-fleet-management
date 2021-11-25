@@ -134,6 +134,7 @@ func (mqttClient *MQTTClient) reconnectHandler() {
 				mqttClient.subscribe()
 			}
 		}
+		retry.Reset(1 * time.Second)
 	}
 }
 
