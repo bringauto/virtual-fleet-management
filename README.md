@@ -12,7 +12,8 @@ This project serves as testing base for BA daemon. Virtual industrial portal imp
 ## Tests
 
 ## Scenarios 
-Scenarios are stored in [virtual-industrial-portal](https://gitlab.bringauto.com/bring-auto/host-platform/virtual-industrial-portal) in folder scenarios in json format. Files are distributed  into folders depending on topics they will be used on. For example scenarios for topic bringauto/kralovopolska/car1 will be stored in virtual-industrial-portal/scenarios/bringauto/kralovopolska/car1/. Each car folder can contain multiple scenario files, but right now one scenario per car is supported, first correct file will be run and other files will be ignored
+Scenarios are stored in [virtual-industrial-portal](https://gitlab.bringauto.com/bring-auto/host-platform/virtual-industrial-portal) in folder scenarios in json format. Files are distributed  into folders depending on topics they will be used on.
+For example scenarios for topic bringauto/kralovopolska/car1 will be stored in virtual-industrial-portal/scenarios/bringauto/kralovopolska/car1/. Each car folder can contain multiple scenario files, but right now one scenario per car is supported, first correct file will be run and other files will be ignored
 
 ### JSON format
 Json files contain information about map file that is used for missions (name or path to it) and list of missions. Each mission contain timestamp, name and list of stops. Timestamp informs the virtual industrial portal after how long period after establishing first connection of given car will be the mission started. Example:
