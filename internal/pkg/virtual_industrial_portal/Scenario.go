@@ -60,7 +60,7 @@ func (scenario *Scenario)markStopAsDone(stopToMark string){
 			scenario.currentMission.Stops = scenario.currentMission.Stops[1:]
 			scenario.missionChanged = true
 	} else {
-		panic(fmt.Sprintf("[%v] Vehicle trying to mark wrong stop as done, received: %s, should be: %s, mission: %v", scenario.topic, stopToMark, scenario.currentMission.Stops[0].Name, scenario.currentMission.Name))
+		return
 	} 
 
 	scenario.updateMissionIfEmpty()

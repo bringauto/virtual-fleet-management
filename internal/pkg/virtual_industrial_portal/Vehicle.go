@@ -116,7 +116,7 @@ func (vehicle *Vehicle) parseStatus(message *pb.Status) {
 			vehicle.scenario.markStopAsDone(stop)
 		}
 	case pb.Status_ServerError_OK:
-		if message.CarStatus.State == pb.CarStatus_IN_STOP && message.CarStatus.State != vehicle.vehicleState { //check for stop
+		if message.CarStatus.State == pb.CarStatus_IN_STOP && message.CarStatus.State == vehicle.vehicleState { //check for stop
 			vehicle.scenario.markStopAsDone(message.CarStatus.Stop.To)
 		}
 	}
