@@ -1,9 +1,9 @@
-# Virtual industrial portal
-This project serves as testing base for BA daemon. Virtual industrial portal implements [industrial portal protocol](https://docs.google.com/document/d/1sjIE4_c9NrQCpUvlgOwejVMWf6U-QSh_9qobpMqOIRU/edit) using MQTT and it replays mission scenarios to connected cars, also logging states of car.
+# Virtual Fleet
+This project serves as testing base for BA daemon. Virtual fleet implements [industrial portal protocol](https://docs.google.com/document/d/1sjIE4_c9NrQCpUvlgOwejVMWf6U-QSh_9qobpMqOIRU/edit) using MQTT and it replays mission scenarios to connected cars, also logging states of car.
 
 ## Requirements
 - [golang](https://golang.org/)
-- [protobuff compiler v3.17.3](https://github.com/protocolbuffers/protobuf/releases/tag/v3.17.3) 
+- [protobuff compiler v3.17.3](https://github.com/protocolbuffers/protobuf/releases/tag/v3.17.3)
 
 ## Arguments
 - --broker-ip=<ipv4> -ip address of broker
@@ -11,12 +11,12 @@ This project serves as testing base for BA daemon. Virtual industrial portal imp
 
 ## Tests
 
-## Scenarios 
-Scenarios are stored in [virtual-industrial-portal](https://gitlab.bringauto.com/bring-auto/host-platform/virtual-industrial-portal) in folder scenarios in json format. Files are distributed  into folders depending on topics they will be used on.
-For example scenarios for topic bringauto/kralovopolska/car1 will be stored in virtual-industrial-portal/scenarios/bringauto/kralovopolska/car1/. Each car folder can contain multiple scenario files, but right now one scenario per car is supported, first correct file will be run and other files will be ignored
+## Scenarios
+Scenarios are stored in [virtual-fleet scenarios folder](scenarios/) in json format. Files are distributed  into folders depending on topics they will be used on.
+For example scenarios for topic bringauto/kralovopolska/car1 will be stored in virtual-fleet/scenarios/bringauto/kralovopolska/car1/. Each car folder can contain multiple scenario files, but right now one scenario per car is supported, first correct file will be run and other files will be ignored
 
 ### JSON format
-Json files contain information about map file that is used for missions (name or path to it) and list of missions. Each mission contain timestamp, name and list of stops. Timestamp informs the virtual industrial portal after how long period after establishing first connection of given car will be the mission started. Example:
+Json files contain information about map file that is used for missions (name or path to it) and list of missions. Each mission contain timestamp, name and list of stops. Timestamp informs the virtual fleet after how long period after establishing first connection of given car will be the mission started. Example:
 
 ```
 {
@@ -50,9 +50,9 @@ Run build script from project folder:
 ```
 bash ./scripts/local_build.sh
 ```
-Run the app: 
+Run the app:
 ```
-./virtual-industrial-portal
+./virtual-fleet-app
 ```
 
 ## Compiling proto
@@ -70,7 +70,7 @@ protoc -I=./autonomy-host-protocol --go_out=./autonomy-host-protocol autonomy-ho
 ## Build and run docker image
 Build the image using:
 ```
-docker build --tag virtual-industrial-portal .
+docker build --tag virtual-fleet .
 ```
 You can list docker images using:
 ```
@@ -78,5 +78,5 @@ docker images
 ```
 and find image id of your docker container. Run the image using:
 ```
-docker run -ti --rm virtual-industrial-portal /virtual-industrial-portal/virtual-industrial-portal --broker-ip=<MQTT broker ipv4> --broker-port=<MQTT broker port> scenario-dir=<path to scenario dir>
+docker run -ti --rm virtual-fleet /virtual-fleet/virtual-fleet-app --broker-ip=<MQTT broker ipv4> --broker-port=<MQTT broker port> scenario-dir=<path to scenario dir>
 ```

@@ -8,7 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	ip "virtual_industrial_portal"
+	ip "virtual_fleet"
 )
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 }
 
 func setUpLogger(path string){
-		file, err := os.OpenFile(path + "/virtual-industrial-portal.log", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
+		file, err := os.OpenFile(path + "/virtual-fleet.log", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
 		if err != nil {
 				log.Fatal(err)
 		}   
