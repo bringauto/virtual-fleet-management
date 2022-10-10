@@ -25,13 +25,13 @@ func GetIndustrialPortalStatusResponse(sessionId string) []byte {
 	return getBinaryFromMessage(&message)
 }
 
-func GetIndustrialPortalCommand(action pb.CarCommand_Action, stops []string, sessionId string) []byte {
+func GetIndustrialPortalCommand(action pb.CarCommand_Action, stops []string, route string, sessionId string) []byte {
 	stopList := []*pb.Stop{}
 	for _, element := range stops {
 		stopList = append(stopList, &pb.Stop{To: element})
 	}
 
-	var carCommand = pb.CarCommand{Stops: stopList, Action: action}
+	var carCommand = pb.CarCommand{Stops: stopList, Action: action, Route: route}
 
 	var command = pb.Command{CarCommand: &carCommand, SessionId: sessionId}
 	var ipCommand = pb.MessageIndustrialPortal_Command{Command: &command}
@@ -139,7 +139,7 @@ func CreateMessageBinaries() {
 	PrintDataToFile(path, "connect_response.txt", bin)
 
 	var stopList = []string{"Vodik", "Hala"}
-	bin = GetIndustrialPortalCommand(pb.CarCommand_START, stopList, sessionId)
+	bin = GetIndustrialPortalCommand(pb.CarCommand_START, stopList, "route", sessionId)
 	PrintDataToFile(path, "command.txt", bin)
 
 	bin = GetDaemonCommandResponse(sessionId)

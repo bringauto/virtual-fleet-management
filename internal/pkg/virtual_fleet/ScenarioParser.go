@@ -21,7 +21,7 @@ func GetListOfTopics(pathToScenarioFolder string) []string{
 		}
 	}
 	log.Printf("[INFO] Parsed topics: %v\n", topics)
-    
+
 	return topics
 }
 
@@ -42,7 +42,7 @@ func GetScenario(topic, scenarioPath string, loop bool) *Scenario{
 		matched, err := filepath.Match("*.json", filepath.Base(filePath))
 		if err != nil {
             panic(fmt.Sprintf("[%v] Failed to match filename %v", topic, err.Error()))
-        } else if matched {	
+        } else if matched {
 			scenarioStruct = parseJson(filePath)
 			break
         }else{
@@ -57,7 +57,7 @@ func GetScenario(topic, scenarioPath string, loop bool) *Scenario{
 }
 
 func parseJson(path string)(scenarioStruct ScenarioStruct){
-	
+
 	file, _ := ioutil.ReadFile(path)
 	err := json.Unmarshal([]byte(file), &scenarioStruct)
 
@@ -80,6 +80,6 @@ func getListsOfDirsAndFiles(path string)(dirs, files []string){
 		}else{
 			files = append(files, dir.Name())
 		}
-    } 
+    }
 	return dirs, files;
 }

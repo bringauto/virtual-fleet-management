@@ -212,7 +212,7 @@ func (vehicle *Vehicle) resetVehicle() {
 	if vehicle.responseTimer.timer != nil {
 		vehicle.responseTimer.timer.Stop()
 		vehicle.responseTimer.cancelTimer <- struct{}{}
-	} 
+	}
 	vehicle.timeoutTimer = CancelableTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 30}
 	vehicle.responseTimer = CancelableTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 10}
 
@@ -224,9 +224,9 @@ func (vehicle *Vehicle) sendConnectResponse(sessionId string, responseType pb.Co
 }
 
 func (vehicle *Vehicle) sendCommand() {
-	log.Printf("[INFO] [%v] Sending command, sessionID: %v, command: START, mission:%v\n", vehicle.scenario.topic, vehicle.sessionId, vehicle.scenario.getStopList())
+	log.Printf("[INFO] [%v] Sending command, sessionID: %v, command: START, mission:%v, route:%v\n", vehicle.scenario.topic, vehicle.sessionId, vehicle.scenario.getStopList(), vehicle.scenario.currentMission.Route)
 	vehicle.startResponseTimer()
-	var command = proto_helper.GetIndustrialPortalCommand(pb.CarCommand_START, vehicle.scenario.getStopList(), vehicle.sessionId)
+	var command = proto_helper.GetIndustrialPortalCommand(pb.CarCommand_START, vehicle.scenario.getStopList(), vehicle.scenario.currentMission.Route, vehicle.sessionId)
 	Client.publish(vehicle.industrialPortalTopic, command)
 	vehicle.scenario.markMissionAccepted()
 }

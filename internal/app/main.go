@@ -24,20 +24,20 @@ func main() {
 	setUpLogger(*logPath)
 	var server = *brokerIp + ":" + *brokerPort
 	setSignalHandler()
-	ip.Client.Start(server, "", "", *scenariosPath, *loop)
+	ip.Client.Start(server, "", "", *scenariosPath, *loop, 0)
 }
 
 func setUpLogger(path string){
 		file, err := os.OpenFile(path + "/virtual-fleet.log", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
 		if err != nil {
 				log.Fatal(err)
-		}   
+		}
 
-	
+
 		multiWriter := io.MultiWriter(os.Stdout, file)
 		log.SetOutput(multiWriter)
 		log.SetFlags(log.Lmicroseconds)
-	
+
 }
 
 func setSignalHandler() {

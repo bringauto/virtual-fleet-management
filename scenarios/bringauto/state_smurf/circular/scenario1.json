@@ -1,0 +1,23 @@
+{
+	"map": "smurfTest.osm",
+	"missions": [
+		{
+			"timestamp": "5",
+			"name": "mission1",
+			"stops": [
+				{"name": "first"},
+				{"name": "second"}
+			],
+			"route": "lap"
+		},
+		{
+			"timestamp": "30",
+			"name": "mission2",
+			"stops": [
+				{"name": "fourth"},
+				{"name": "first"}
+			],
+			"route": "lap"
+		}
+	]
+}
