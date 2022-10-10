@@ -15,11 +15,12 @@ type MQTTClient struct {
 	server, username, password string
 	tcpCon                     net.Conn
 	vehicles				   []*Vehicle
+	qos						   byte
 }
 
 var Client = MQTTClient{}
 
-func (mqttClient *MQTTClient) Start(server, username, password string, scenariosPath string, loop bool) {
+func (mqttClient *MQTTClient) Start(server, username, password string, scenariosPath string, loop bool, qos byte) {
 	log.Printf("[INFO] Connecting to broker at %v\n", server)
 
     defer func() {
@@ -31,18 +32,17 @@ func (mqttClient *MQTTClient) Start(server, username, password string, scenarios
 	mqttClient.server = server
 	mqttClient.username = username
 	mqttClient.password = password
+	mqttClient.qos = qos
 
 	mqttClient.msgChan = make(chan *paho.Publish)
 
-
 	topics := GetListOfTopics(scenariosPath)
 
-	//todo parse json
 	for _, topic := range topics{
 		scenario := GetScenario(topic, scenariosPath, loop)
 		mqttClient.vehicles = append(mqttClient.vehicles, NewVehicle(topic, scenario))
 	}
-	
+
 	mqttClient.tcpConnect()
 	mqttClient.mqttConnect()
 	mqttClient.subscribe()
@@ -159,18 +159,17 @@ func (mqttClient *MQTTClient) Disconnect() {
 }
 
 func (mqttClient *MQTTClient) subscribe() {
-	var qos = 2
 	for _, vehicle := range mqttClient.vehicles {
 		daemonTopic := vehicle.daemonTopic
 		sa, err := mqttClient.client.Subscribe(context.Background(), &paho.Subscribe{
 			Subscriptions: map[string]paho.SubscribeOptions{
-				daemonTopic: {QoS: byte(qos)},
+				daemonTopic: {QoS: mqttClient.qos},
 			},
 		})
 		if err != nil {
 			log.Printf("[ERROR] [%v] Failed to subscribe to deamon topic: %d\n", vehicle.scenario.topic, err)
 		}
-		if sa.Reasons[0] != byte(qos) {
+		if sa.Reasons[0] != mqttClient.qos {
 			log.Printf("[ERROR] [%v] Failed to subscribe to deamon topic: %d\n",vehicle.scenario.topic, sa.Reasons[0])
 		}
 		log.Printf("[INFO] [%v] Subscribed to deamon topic\n", vehicle.scenario.topic)
@@ -180,7 +179,7 @@ func (mqttClient *MQTTClient) subscribe() {
 func (mqttClient *MQTTClient) publish(topic string, binaryMessage []byte) bool {
 	_, err := mqttClient.client.Publish(context.Background(), &paho.Publish{
 		Topic:   topic,
-		QoS:     byte(2),
+		QoS:     mqttClient.qos,
 		Retain:  false,
 		Payload: []byte(binaryMessage),
 	})
