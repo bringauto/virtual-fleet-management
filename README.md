@@ -6,8 +6,8 @@ This project serves as testing base for BA daemon. Virtual fleet implements [ind
 - [protobuff compiler v3.17.3](https://github.com/protocolbuffers/protobuf/releases/tag/v3.17.3)
 
 ## Arguments
-- --broker-ip=<ipv4> -ip address of broker
-- --broker-port=<port> - port of broker
+- --broker-ip=\<ipv4> - IP address of the MQTT broker
+- --broker-port=\<port> - port of the MQTT broker
 
 ## Tests
 
@@ -20,28 +20,42 @@ Json files contain information about map file that is used for missions (name or
 
 ```
 {
-	"map": "borsodchem.osm",
-	"missions": [
-		{
-		 "timestamp": "0",
-                 "name":"mission1",
-		 "stops": [
-			{"name": "Lab A-blok"},
-			{"name": "Plnička"}
-			]
-		},
-		{
-	 	 "timestamp": "30",
-                 "name":"mission2",
-		 "stops": [
-			{"name": "Vodík"},
-			{"name": "Lab A-blok"}
-			]
-		}
-	]
+    "map": "London.osm",
+    "missions": [
+        {
+            "timestamp": "0",
+            "name": "mission1",
+            "stops": [
+                {
+                    "name": "London National Theatre"
+                },
+                {
+                    "name": "Cross Station"
+                }
+            ],
+            "route": "Short"
+        },
+        {
+            "timestamp": "150",
+            "name": "mission2",
+            "stops": [
+                {
+                    "name": "Cross Station"
+                },
+                {
+                    "name": "Oasis Academy"
+                },
+                {
+                    "name": "London Waterloo"
+                }
+            ],
+            "route": "Long"
+        }
+    ]
 }
 ```
-This scenario will play mission ["Lab A-blok", "Plnička" ] from map borsodchem.osm from timestamp 0 to 30 (calculated from fir connection with given car) and after that time interval it will switch to second mission  [ "Vodík", "Lab A-blok" ]
+This scenario will play mission ["London National Theatre", "Cross Station" ] from map London.osm from timestamp 0 to 150 (calculated from fir connection with given car)
+and after that time interval it will switch to second mission  [ "Cross Station", "Oasis Academy", "London Waterloo" ]
 
 
 

@@ -1,21 +1,34 @@
 {
-	"map": "smurfTest.osm",
-	"missions": [
-		{
-		 "timestamp": "5",
-		 "name": "mission1",
-		 "stops": [
-			{"name": "first"},
-			{"name": "second"}
-			]
-		},
-		{
-	 	 "timestamp": "30",
-		 "name": "mission2",
-		 "stops": [
-			{"name": "fourth"},
-			{"name": "fifth"}
-			]
-		}
-	]
+    "map": "London.osm",
+    "missions": [
+        {
+            "timestamp": "0",
+            "name": "mission1",
+            "stops": [
+                {
+                    "name": "London National Theatre"
+                },
+                {
+                    "name": "Cross Station"
+                }
+            ],
+            "route": "Short"
+        },
+        {
+            "timestamp": "180",
+            "name": "mission2",
+            "stops": [
+                {
+                    "name": "Cross Station"
+                },
+                {
+                    "name": "Oasis Academy"
+                },
+                {
+                    "name": "London Waterloo"
+                }
+            ],
+            "route": "Long"
+        }
+    ]
 }

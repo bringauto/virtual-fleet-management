@@ -19,6 +19,7 @@ type MissionStruct struct {
 	Stops     []struct {
 		Name string `json:"name"`
 	} `json:"stops"`
+	Route string `json:"route"`
 }
 
 type Scenario struct{
@@ -61,7 +62,7 @@ func (scenario *Scenario)markStopAsDone(stopToMark string){
 			scenario.missionChanged = true
 	} else {
 		return
-	} 
+	}
 
 	scenario.updateMissionIfEmpty()
 }
