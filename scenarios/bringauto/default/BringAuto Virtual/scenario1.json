@@ -6,29 +6,29 @@
             "name": "mission1",
             "stops": [
                 {
-                    "name": "London National Theatre"
+                    "name": "Lidická"
                 },
                 {
-                    "name": "Cross Station"
+                    "name": "Drobného"
                 }
             ],
-            "route": "Short"
+            "route": "Lužánky"
         },
         {
             "timestamp": "180",
             "name": "mission2",
             "stops": [
                 {
-                    "name": "Cross Station"
+                    "name": "Lidická"
                 },
                 {
-                    "name": "Oasis Academy"
+                    "name": "Lidická"
                 },
                 {
-                    "name": "London Waterloo"
+                    "name": "Drobného"
                 }
             ],
-            "route": "Long"
+            "route": "Lužánky"
         }
     ]
 }
