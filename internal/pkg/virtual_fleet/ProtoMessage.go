@@ -1,4 +1,4 @@
-package proto_helper
+package virtual_industrial_portal
 
 import (
 	pb "ba_proto"
@@ -25,13 +25,20 @@ func GetIndustrialPortalStatusResponse(sessionId string) []byte {
 	return getBinaryFromMessage(&message)
 }
 
-func GetIndustrialPortalCommand(action pb.CarCommand_Action, stops []string, route string, sessionId string) []byte {
+func GetIndustrialPortalCommand(action pb.CarCommand_Action, stops []string, route string, sessionId string, stations []StationStruct) []byte {
 	stopList := []*pb.Stop{}
 	for _, element := range stops {
 		stopList = append(stopList, &pb.Stop{To: element})
 	}
 
-	var carCommand = pb.CarCommand{Stops: stopList, Action: action, Route: route}
+	stationList := []*pb.Station{}
+	if stations != nil {
+		for _, station := range stations {
+			stationList = append(stationList, &pb.Station{Name: station.Name, Position: &pb.Station_Position{Latitude: station.Position.Latitude, Longitude: station.Position.Longitude, Altitude: station.Position.Altitude}})
+		}
+	}
+
+	var carCommand = pb.CarCommand{Stops: stopList, Action: action, Route: route, RouteStations: stationList}
 
 	var command = pb.Command{CarCommand: &carCommand, SessionId: sessionId}
 	var ipCommand = pb.MessageIndustrialPortal_Command{Command: &command}
@@ -119,29 +126,4 @@ func PrintDataToFile(filepath, filename string, message []byte) {
 	if err != nil {
 		panic(fmt.Sprintf("Cannot write proto buffer into file %s\n", "./"+filename))
 	}
-}
-
-//todo parameters?
-func CreateMessageBinaries() {
-	var path = "./"
-	var sessionId = "000f"
-
-	var bin = GetDaemonStatus(45.1, 44.2, 868, 15, 99.9, sessionId, "Vodik", pb.Status_ServerError_OK, nil)
-	PrintDataToFile(path, "status.txt", bin)
-
-	bin = GetIndustrialPortalStatusResponse(sessionId)
-	PrintDataToFile(path, "status_response.txt", bin)
-
-	bin = GetDaemonConnect("BringAuto", "Car1", sessionId)
-	PrintDataToFile(path, "connect.txt", bin)
-
-	bin = GetIndustrialPortalConnectResponse(pb.ConnectResponse_OK, sessionId)
-	PrintDataToFile(path, "connect_response.txt", bin)
-
-	var stopList = []string{"Vodik", "Hala"}
-	bin = GetIndustrialPortalCommand(pb.CarCommand_START, stopList, "route", sessionId)
-	PrintDataToFile(path, "command.txt", bin)
-
-	bin = GetDaemonCommandResponse(sessionId)
-	PrintDataToFile(path, "command_response.txt", bin)
 }

@@ -11,6 +11,7 @@ import (
 type ScenarioStruct struct {
 	Map     string `json:"map"`
 	Missions 	[]MissionStruct `json:"missions"`
+	Routes		[]RouteStruct `json:"routes"`
 }
 
 type MissionStruct struct {
@@ -22,7 +23,23 @@ type MissionStruct struct {
 	Route string `json:"route"`
 }
 
-type Scenario struct{
+type Position struct {
+	Latitude float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+	Altitude float64 `json:"altitude"`
+}
+
+type StationStruct struct {
+	Name string `json:"name"`
+	Position Position `json:"position"`
+}
+
+type RouteStruct struct {
+	Name string `json:"name"`
+	Stations []StationStruct `json:"stations"`
+}
+
+type Scenario struct {
 	topic string
 	scenarioData ScenarioStruct
 	remainingMissions []MissionStruct
@@ -50,6 +67,16 @@ func (scenario *Scenario)getStopList()[]string{
 		stopList = append(stopList, stop.Name)
 	}
 	return stopList
+}
+
+func (scenario *Scenario)getStationList()[]StationStruct{
+	for _, route := range scenario.scenarioData.Routes {
+		if route.Name == scenario.currentMission.Route {
+			return route.Stations
+		}
+	}
+	log.Printf("[WARNING] Selected route does not have stations")
+	return nil
 }
 
 func (scenario *Scenario)markStopAsDone(stopToMark string){
