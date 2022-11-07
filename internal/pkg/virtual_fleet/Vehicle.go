@@ -4,7 +4,6 @@ import (
 	pb "ba_proto"
 	"fmt"
 	"log"
-	"proto_helper"
 	"time"
 )
 
@@ -13,7 +12,7 @@ type Vehicle struct {
 	connectionState                               int
 	vehicleState                                  pb.CarStatus_State
 	timeoutTimer, responseTimer                   CancelableTimer
-	scenario									  *Scenario
+	scenario                                      *Scenario
 }
 
 type CancelableTimer struct {
@@ -44,11 +43,11 @@ const (
 func (vehicle *Vehicle) parseMessage(binaryMessage []byte) {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Printf("[ERROR] [%v] %v",vehicle.scenario.topic, r)
+			log.Printf("[ERROR] [%v] %v", vehicle.scenario.topic, r)
 		}
 	}()
 
-	daemonMessage, err := proto_helper.GetDaemonMessageFromBinary(binaryMessage)
+	daemonMessage, err := GetDaemonMessageFromBinary(binaryMessage)
 
 	if err != nil {
 		panic(fmt.Sprintf("%v", err))
@@ -98,7 +97,7 @@ func (vehicle *Vehicle) parseStatus(message *pb.Status) {
 		message.CarStatus.Telemetry.Position.Latitude,
 		message.CarStatus.Telemetry.Position.Altitude,
 		message.CarStatus.Telemetry.Speed,
-		message.CarStatus.Telemetry.Fuel)
+		message.CarStatus.Telemetry.Fuel*100)
 
 	vehicle.connectionValidityCheck(message.SessionId, "status")
 	vehicle.resetTimeoutTimer()
@@ -111,7 +110,7 @@ func (vehicle *Vehicle) parseStatus(message *pb.Status) {
 			doneStops = append(doneStops, stop.To)
 
 		}
-		log.Printf("[WARNING] [%v] Received server error with stops: %v, mission is: %v, sessionID: %v\n",vehicle.scenario.topic, doneStops, vehicle.scenario.getStopList(), vehicle.sessionId)
+		log.Printf("[WARNING] [%v] Received server error with stops: %v, mission is: %v, sessionID: %v\n", vehicle.scenario.topic, doneStops, vehicle.scenario.getStopList(), vehicle.sessionId)
 		for _, stop := range doneStops {
 			vehicle.scenario.markStopAsDone(stop)
 		}
@@ -127,11 +126,10 @@ func (vehicle *Vehicle) parseStatus(message *pb.Status) {
 	}
 	vehicle.vehicleState = message.CarStatus.State
 
-	if(vehicle.scenario.missionChanged){
+	if vehicle.scenario.missionChanged {
 		vehicle.sendCommand()
 	}
 }
-
 
 func (vehicle *Vehicle) parseCommandResponse(message *pb.CommandResponse) {
 	vehicle.connectionValidityCheck(message.SessionId, "command response")
@@ -205,7 +203,7 @@ func (vehicle *Vehicle) resetVehicle() {
 	vehicle.changeState(CONNECTION_DISCONNECTED)
 	vehicle.sessionId = ""
 	vehicle.vehicleState = pb.CarStatus_ERROR
- 	if vehicle.timeoutTimer.timer != nil {
+	if vehicle.timeoutTimer.timer != nil {
 		vehicle.timeoutTimer.timer.Stop()
 		vehicle.timeoutTimer.cancelTimer <- struct{}{}
 	}
@@ -219,20 +217,21 @@ func (vehicle *Vehicle) resetVehicle() {
 }
 
 func (vehicle *Vehicle) sendConnectResponse(sessionId string, responseType pb.ConnectResponse_Type) {
-	var connectResponse = proto_helper.GetIndustrialPortalConnectResponse(responseType, sessionId)
+	var connectResponse = GetIndustrialPortalConnectResponse(responseType, sessionId)
 	Client.publish(vehicle.industrialPortalTopic, connectResponse)
 }
 
 func (vehicle *Vehicle) sendCommand() {
 	log.Printf("[INFO] [%v] Sending command, sessionID: %v, command: START, mission:%v, route:%v\n", vehicle.scenario.topic, vehicle.sessionId, vehicle.scenario.getStopList(), vehicle.scenario.currentMission.Route)
 	vehicle.startResponseTimer()
-	var command = proto_helper.GetIndustrialPortalCommand(pb.CarCommand_START, vehicle.scenario.getStopList(), vehicle.scenario.currentMission.Route, vehicle.sessionId)
+	var command = GetIndustrialPortalCommand(pb.CarCommand_START, vehicle.scenario.getStopList(),
+		vehicle.scenario.currentMission.Route, vehicle.sessionId, vehicle.scenario.getStationList())
 	Client.publish(vehicle.industrialPortalTopic, command)
 	vehicle.scenario.markMissionAccepted()
 }
 
 func (vehicle *Vehicle) sendStatusResponse() {
-	var statusResponse = proto_helper.GetIndustrialPortalStatusResponse(vehicle.sessionId)
+	var statusResponse = GetIndustrialPortalStatusResponse(vehicle.sessionId)
 	Client.publish(vehicle.industrialPortalTopic, statusResponse)
 }
 

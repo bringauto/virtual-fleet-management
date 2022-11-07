@@ -247,9 +247,10 @@ type CarCommand struct {
 	//*
 	// List of stops where the car shall go. Car goes from one stop to another by the order specified by the list.
 	// OPTIONAL
-	Stops  []*Stop           `protobuf:"bytes,1,rep,name=stops,proto3" json:"stops,omitempty"`
-	Action CarCommand_Action `protobuf:"varint,2,opt,name=action,proto3,enum=CarStateProtocol.CarCommand_Action" json:"action,omitempty"`
-	Route  string            `protobuf:"bytes,3,opt,name=route,proto3" json:"route,omitempty"`
+	Stops         []*Stop           `protobuf:"bytes,1,rep,name=stops,proto3" json:"stops,omitempty"`
+	Action        CarCommand_Action `protobuf:"varint,2,opt,name=action,proto3,enum=CarStateProtocol.CarCommand_Action" json:"action,omitempty"`
+	Route         string            `protobuf:"bytes,3,opt,name=route,proto3" json:"route,omitempty"`
+	RouteStations []*Station        `protobuf:"bytes,4,rep,name=routeStations,proto3" json:"routeStations,omitempty"`
 }
 
 func (x *CarCommand) Reset() {
@@ -305,8 +306,15 @@ func (x *CarCommand) GetRoute() string {
 	return ""
 }
 
+func (x *CarCommand) GetRouteStations() []*Station {
+	if x != nil {
+		return x.RouteStations
+	}
+	return nil
+}
+
 //*
-// Stop on the route.
+// Mission for the car.
 type Stop struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -356,6 +364,67 @@ func (x *Stop) GetTo() string {
 	return ""
 }
 
+//*
+// Station on the route.
+type Station struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	//*
+	// The name of the station.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	//*
+	// The position of the station.
+	Position *Station_Position `protobuf:"bytes,2,opt,name=position,proto3" json:"position,omitempty"`
+}
+
+func (x *Station) Reset() {
+	*x = Station{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_CarStateProtocol_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Station) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Station) ProtoMessage() {}
+
+func (x *Station) ProtoReflect() protoreflect.Message {
+	mi := &file_CarStateProtocol_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Station.ProtoReflect.Descriptor instead.
+func (*Station) Descriptor() ([]byte, []int) {
+	return file_CarStateProtocol_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Station) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Station) GetPosition() *Station_Position {
+	if x != nil {
+		return x.Position
+	}
+	return nil
+}
+
 type CarStatus_Telemetry struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -381,7 +450,7 @@ type CarStatus_Telemetry struct {
 func (x *CarStatus_Telemetry) Reset() {
 	*x = CarStatus_Telemetry{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_CarStateProtocol_proto_msgTypes[3]
+		mi := &file_CarStateProtocol_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -394,7 +463,7 @@ func (x *CarStatus_Telemetry) String() string {
 func (*CarStatus_Telemetry) ProtoMessage() {}
 
 func (x *CarStatus_Telemetry) ProtoReflect() protoreflect.Message {
-	mi := &file_CarStateProtocol_proto_msgTypes[3]
+	mi := &file_CarStateProtocol_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -431,6 +500,7 @@ func (x *CarStatus_Telemetry) GetPosition() *CarStatus_Position {
 	return nil
 }
 
+// GPS position of the car
 type CarStatus_Position struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -450,7 +520,7 @@ type CarStatus_Position struct {
 func (x *CarStatus_Position) Reset() {
 	*x = CarStatus_Position{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_CarStateProtocol_proto_msgTypes[4]
+		mi := &file_CarStateProtocol_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -463,7 +533,7 @@ func (x *CarStatus_Position) String() string {
 func (*CarStatus_Position) ProtoMessage() {}
 
 func (x *CarStatus_Position) ProtoReflect() protoreflect.Message {
-	mi := &file_CarStateProtocol_proto_msgTypes[4]
+	mi := &file_CarStateProtocol_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -494,6 +564,76 @@ func (x *CarStatus_Position) GetLongitude() float64 {
 }
 
 func (x *CarStatus_Position) GetAltitude() float64 {
+	if x != nil {
+		return x.Altitude
+	}
+	return 0
+}
+
+// GPS position added in v1.2, must be on both places (here and Status) because of backwards compability
+type Station_Position struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	//*
+	// WGS84 latitude,
+	Latitude float64 `protobuf:"fixed64,1,opt,name=latitude,proto3" json:"latitude,omitempty"`
+	//*
+	// WGS84 longitude
+	Longitude float64 `protobuf:"fixed64,2,opt,name=longitude,proto3" json:"longitude,omitempty"`
+	//*
+	// altitude in [m]
+	Altitude float64 `protobuf:"fixed64,3,opt,name=altitude,proto3" json:"altitude,omitempty"`
+}
+
+func (x *Station_Position) Reset() {
+	*x = Station_Position{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_CarStateProtocol_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Station_Position) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Station_Position) ProtoMessage() {}
+
+func (x *Station_Position) ProtoReflect() protoreflect.Message {
+	mi := &file_CarStateProtocol_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Station_Position.ProtoReflect.Descriptor instead.
+func (*Station_Position) Descriptor() ([]byte, []int) {
+	return file_CarStateProtocol_proto_rawDescGZIP(), []int{3, 0}
+}
+
+func (x *Station_Position) GetLatitude() float64 {
+	if x != nil {
+		return x.Latitude
+	}
+	return 0
+}
+
+func (x *Station_Position) GetLongitude() float64 {
+	if x != nil {
+		return x.Longitude
+	}
+	return 0
+}
+
+func (x *Station_Position) GetAltitude() float64 {
 	if x != nil {
 		return x.Altitude
 	}
@@ -535,7 +675,7 @@ var file_CarStateProtocol_proto_rawDesc = []byte{
 	0x12, 0x09, 0x0a, 0x05, 0x44, 0x52, 0x49, 0x56, 0x45, 0x10, 0x01, 0x12, 0x0b, 0x0a, 0x07, 0x49,
 	0x4e, 0x5f, 0x53, 0x54, 0x4f, 0x50, 0x10, 0x02, 0x12, 0x0c, 0x0a, 0x08, 0x4f, 0x42, 0x53, 0x54,
 	0x41, 0x43, 0x4c, 0x45, 0x10, 0x03, 0x12, 0x09, 0x0a, 0x05, 0x45, 0x52, 0x52, 0x4f, 0x52, 0x10,
-	0x04, 0x22, 0xbb, 0x01, 0x0a, 0x0a, 0x43, 0x61, 0x72, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64,
+	0x04, 0x22, 0xfc, 0x01, 0x0a, 0x0a, 0x43, 0x61, 0x72, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64,
 	0x12, 0x2c, 0x0a, 0x05, 0x73, 0x74, 0x6f, 0x70, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32,
 	0x16, 0x2e, 0x43, 0x61, 0x72, 0x53, 0x74, 0x61, 0x74, 0x65, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x63,
 	0x6f, 0x6c, 0x2e, 0x53, 0x74, 0x6f, 0x70, 0x52, 0x05, 0x73, 0x74, 0x6f, 0x70, 0x73, 0x12, 0x3b,
@@ -544,15 +684,32 @@ var file_CarStateProtocol_proto_rawDesc = []byte{
 	0x6c, 0x2e, 0x43, 0x61, 0x72, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x2e, 0x41, 0x63, 0x74,
 	0x69, 0x6f, 0x6e, 0x52, 0x06, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x14, 0x0a, 0x05, 0x72,
 	0x6f, 0x75, 0x74, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x72, 0x6f, 0x75, 0x74,
-	0x65, 0x22, 0x2c, 0x0a, 0x06, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x0d, 0x0a, 0x09, 0x4e,
-	0x4f, 0x5f, 0x41, 0x43, 0x54, 0x49, 0x4f, 0x4e, 0x10, 0x00, 0x12, 0x08, 0x0a, 0x04, 0x53, 0x54,
-	0x4f, 0x50, 0x10, 0x01, 0x12, 0x09, 0x0a, 0x05, 0x53, 0x54, 0x41, 0x52, 0x54, 0x10, 0x02, 0x22,
-	0x16, 0x0a, 0x04, 0x53, 0x74, 0x6f, 0x70, 0x12, 0x0e, 0x0a, 0x02, 0x74, 0x6f, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x02, 0x74, 0x6f, 0x42, 0x3e, 0x5a, 0x21, 0x2e, 0x2e, 0x2f, 0x69, 0x6e,
-	0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x62, 0x61, 0x5f, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x3b, 0x62, 0x61, 0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0xaa, 0x02, 0x18, 0x47,
-	0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x62,
-	0x61, 0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x12, 0x3f, 0x0a, 0x0d, 0x72, 0x6f, 0x75, 0x74, 0x65, 0x53, 0x74, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x73, 0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x43, 0x61, 0x72, 0x53, 0x74,
+	0x61, 0x74, 0x65, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x53, 0x74, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x52, 0x0d, 0x72, 0x6f, 0x75, 0x74, 0x65, 0x53, 0x74, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x73, 0x22, 0x2c, 0x0a, 0x06, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x0d, 0x0a, 0x09,
+	0x4e, 0x4f, 0x5f, 0x41, 0x43, 0x54, 0x49, 0x4f, 0x4e, 0x10, 0x00, 0x12, 0x08, 0x0a, 0x04, 0x53,
+	0x54, 0x4f, 0x50, 0x10, 0x01, 0x12, 0x09, 0x0a, 0x05, 0x53, 0x54, 0x41, 0x52, 0x54, 0x10, 0x02,
+	0x22, 0x16, 0x0a, 0x04, 0x53, 0x74, 0x6f, 0x70, 0x12, 0x0e, 0x0a, 0x02, 0x74, 0x6f, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x74, 0x6f, 0x22, 0xbf, 0x01, 0x0a, 0x07, 0x53, 0x74, 0x61,
+	0x74, 0x69, 0x6f, 0x6e, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x3e, 0x0a, 0x08, 0x70, 0x6f, 0x73, 0x69,
+	0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x22, 0x2e, 0x43, 0x61, 0x72,
+	0x53, 0x74, 0x61, 0x74, 0x65, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x63, 0x6f, 0x6c, 0x2e, 0x53, 0x74,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x08,
+	0x70, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x1a, 0x60, 0x0a, 0x08, 0x50, 0x6f, 0x73, 0x69,
+	0x74, 0x69, 0x6f, 0x6e, 0x12, 0x1a, 0x0a, 0x08, 0x6c, 0x61, 0x74, 0x69, 0x74, 0x75, 0x64, 0x65,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x01, 0x52, 0x08, 0x6c, 0x61, 0x74, 0x69, 0x74, 0x75, 0x64, 0x65,
+	0x12, 0x1c, 0x0a, 0x09, 0x6c, 0x6f, 0x6e, 0x67, 0x69, 0x74, 0x75, 0x64, 0x65, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x01, 0x52, 0x09, 0x6c, 0x6f, 0x6e, 0x67, 0x69, 0x74, 0x75, 0x64, 0x65, 0x12, 0x1a,
+	0x0a, 0x08, 0x61, 0x6c, 0x74, 0x69, 0x74, 0x75, 0x64, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x01,
+	0x52, 0x08, 0x61, 0x6c, 0x74, 0x69, 0x74, 0x75, 0x64, 0x65, 0x42, 0x3e, 0x5a, 0x21, 0x2e, 0x2e,
+	0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x62, 0x61,
+	0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x3b, 0x62, 0x61, 0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0xaa,
+	0x02, 0x18, 0x47, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
+	0x66, 0x2e, 0x62, 0x61, 0x5f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -568,28 +725,32 @@ func file_CarStateProtocol_proto_rawDescGZIP() []byte {
 }
 
 var file_CarStateProtocol_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_CarStateProtocol_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_CarStateProtocol_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_CarStateProtocol_proto_goTypes = []interface{}{
 	(CarStatus_State)(0),        // 0: CarStateProtocol.CarStatus.State
 	(CarCommand_Action)(0),      // 1: CarStateProtocol.CarCommand.Action
 	(*CarStatus)(nil),           // 2: CarStateProtocol.CarStatus
 	(*CarCommand)(nil),          // 3: CarStateProtocol.CarCommand
 	(*Stop)(nil),                // 4: CarStateProtocol.Stop
-	(*CarStatus_Telemetry)(nil), // 5: CarStateProtocol.CarStatus.Telemetry
-	(*CarStatus_Position)(nil),  // 6: CarStateProtocol.CarStatus.Position
+	(*Station)(nil),             // 5: CarStateProtocol.Station
+	(*CarStatus_Telemetry)(nil), // 6: CarStateProtocol.CarStatus.Telemetry
+	(*CarStatus_Position)(nil),  // 7: CarStateProtocol.CarStatus.Position
+	(*Station_Position)(nil),    // 8: CarStateProtocol.Station.Position
 }
 var file_CarStateProtocol_proto_depIdxs = []int32{
-	5, // 0: CarStateProtocol.CarStatus.telemetry:type_name -> CarStateProtocol.CarStatus.Telemetry
+	6, // 0: CarStateProtocol.CarStatus.telemetry:type_name -> CarStateProtocol.CarStatus.Telemetry
 	0, // 1: CarStateProtocol.CarStatus.state:type_name -> CarStateProtocol.CarStatus.State
 	4, // 2: CarStateProtocol.CarStatus.stop:type_name -> CarStateProtocol.Stop
 	4, // 3: CarStateProtocol.CarCommand.stops:type_name -> CarStateProtocol.Stop
 	1, // 4: CarStateProtocol.CarCommand.action:type_name -> CarStateProtocol.CarCommand.Action
-	6, // 5: CarStateProtocol.CarStatus.Telemetry.position:type_name -> CarStateProtocol.CarStatus.Position
-	6, // [6:6] is the sub-list for method output_type
-	6, // [6:6] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	5, // 5: CarStateProtocol.CarCommand.routeStations:type_name -> CarStateProtocol.Station
+	8, // 6: CarStateProtocol.Station.position:type_name -> CarStateProtocol.Station.Position
+	7, // 7: CarStateProtocol.CarStatus.Telemetry.position:type_name -> CarStateProtocol.CarStatus.Position
+	8, // [8:8] is the sub-list for method output_type
+	8, // [8:8] is the sub-list for method input_type
+	8, // [8:8] is the sub-list for extension type_name
+	8, // [8:8] is the sub-list for extension extendee
+	0, // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_CarStateProtocol_proto_init() }
@@ -635,7 +796,7 @@ func file_CarStateProtocol_proto_init() {
 			}
 		}
 		file_CarStateProtocol_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CarStatus_Telemetry); i {
+			switch v := v.(*Station); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -647,7 +808,31 @@ func file_CarStateProtocol_proto_init() {
 			}
 		}
 		file_CarStateProtocol_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CarStatus_Telemetry); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_CarStateProtocol_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*CarStatus_Position); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_CarStateProtocol_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Station_Position); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -665,7 +850,7 @@ func file_CarStateProtocol_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_CarStateProtocol_proto_rawDesc,
 			NumEnums:      2,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
