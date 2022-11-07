@@ -1,5 +1,5 @@
 {
-    "map": "London.osm",
+    "map": "Brno.osm",
     "missions": [
         {
             "timestamp": "0",
@@ -29,6 +29,29 @@
                 }
             ],
             "route": "Lužánky"
+        }
+    ],
+    "routes": [
+        {
+            "name": "Lužánky",
+            "stations": [
+                {
+                    "name": "Lidická",
+                    "position": {
+                        "latitude": 49.20411899128,
+                        "longitude": 16.6067254436,
+                        "altitude": 0
+                    }
+                },
+                {
+                    "name": "Drobného",
+                    "position": {
+                        "latitude": 49.20500309523,
+                        "longitude": 16.61337934367,
+                        "altitude": 0
+                    }
+                }
+            ]
         }
     ]
 }

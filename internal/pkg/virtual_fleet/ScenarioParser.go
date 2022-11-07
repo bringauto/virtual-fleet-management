@@ -51,7 +51,11 @@ func GetScenario(topic, scenarioPath string, loop bool) *Scenario{
 	}
 
 
-	log.Printf("[INFO] [%v] Found scenario files %v, creating scenario %v %v\n",topic, files, scenarioStruct.Map, scenarioStruct.Missions);
+	if scenarioStruct.Routes != nil{
+		log.Printf("[INFO] [%v] Found scenario files %v, creating scenario %v Missions: %v Routes: %v\n", topic, files, scenarioStruct.Map, scenarioStruct.Missions, scenarioStruct.Routes);
+	} else {
+		log.Printf("[INFO] [%v] Found scenario files %v, creating scenario %v Missions: %v\n", topic, files, scenarioStruct.Map, scenarioStruct.Missions);
+	}
 	scenario := NewScenario(scenarioStruct, topic, loop)
 	return scenario
 }

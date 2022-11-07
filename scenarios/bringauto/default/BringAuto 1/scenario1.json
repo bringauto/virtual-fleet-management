@@ -1,31 +1,142 @@
 {
-    "map": "smurfTest.osm",
+    "map": "London.osm",
     "missions": [
         {
-            "timestamp": "5",
+            "timestamp": "0",
             "name": "mission1",
             "stops": [
                 {
-                    "name": "first"
+                    "name": "London National Theatre"
                 },
                 {
-                    "name": "second"
+                    "name": "Cross Station"
                 }
             ],
-            "route": "default"
+            "route": "Short"
         },
         {
-            "timestamp": "30",
+            "timestamp": "180",
             "name": "mission2",
             "stops": [
                 {
-                    "name": "fourth"
+                    "name": "Cross Station"
                 },
                 {
-                    "name": "first"
+                    "name": "Oasis Academy"
+                },
+                {
+                    "name": "London Waterloo"
                 }
             ],
-            "route": "default"
+            "route": "Long"
+        }
+    ],
+    "routes": [
+        {
+            "name": "Short",
+            "stations": [
+                {
+                    "name": "London National Theatre",
+                    "position": {
+                        "latitude": 51.50719991926,
+                        "longitude": -0.11572123647,
+                        "altitude": 0
+                    }
+                },
+                {
+                    "name": "Caffe Nero",
+                    "position": {
+                        "latitude": 51.50991269068,
+                        "longitude": -0.12272179395,
+                        "altitude": 0
+                    }
+                },
+                {
+                    "name": "Cross Station",
+                    "position": {
+                        "latitude": 51.50847034843,
+                        "longitude": -0.12557298213,
+                        "altitude": 0
+                    }
+                },
+                {
+                    "name": "Charger",
+                    "position": {
+                        "latitude": 51.50644281129,
+                        "longitude": -0.12376517192,
+                        "altitude": 0
+                    }
+                },
+                {
+                    "name": "Whitehall Garden",
+                    "position": {
+                        "latitude": 51.5045762963,
+                        "longitude": -0.12320593134,
+                        "altitude": 0
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Long",
+            "stations": [
+                {
+                    "name": "London Waterloo",
+                    "position": {
+                        "latitude": 51.50423320901,
+                        "longitude": -0.11283786178,
+                        "altitude": 0
+                    }
+                },
+                {
+                    "name": "Caffe Nero",
+                    "position": {
+                        "latitude": 51.50991269068,
+                        "longitude": -0.12272179395,
+                        "altitude": 0
+                    }
+                },
+                {
+                    "name": "London National Theatre",
+                    "position": {
+                        "latitude": 51.50719991926,
+                        "longitude": -0.11572123647,
+                        "altitude": 0
+                    }
+                },
+                {
+                    "name": "Cross Station",
+                    "position": {
+                        "latitude": 51.50847034843,
+                        "longitude": -0.12557298213,
+                        "altitude": 0
+                    }
+                },
+                {
+                    "name": "Charger",
+                    "position": {
+                        "latitude": 51.50644281129,
+                        "longitude": -0.12376517192,
+                        "altitude": 0
+                    }
+                },
+                {
+                    "name": "Whitehall Garden",
+                    "position": {
+                        "latitude": 51.5045762963,
+                        "longitude": -0.12320593134,
+                        "altitude": 0
+                    }
+                },
+                {
+                    "name": "Oasis Academy",
+                    "position": {
+                        "latitude": 51.50031457906,
+                        "longitude": -0.11135928467,
+                        "altitude": 0
+                    }
+                }
+            ]
         }
     ]
 }
