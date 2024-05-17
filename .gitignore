@@ -1,6 +1,6 @@
 .vscode
-*.mod
-*.sum
+.idea
+go.sum
 main
 *.txt
 app
