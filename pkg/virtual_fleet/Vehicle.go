@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"time"
+	scenario2 "virtual_fleet_management/pkg/scenario"
 )
 
 type Vehicle struct {
@@ -12,24 +13,24 @@ type Vehicle struct {
 	connectionState                               int
 	vehicleState                                  pb.CarStatus_State
 	timeoutTimer, responseTimer                   CancelableTimer
-	scenario                                      *Scenario
+	scenario                                      *scenario2.Scenario
 }
 
 type CancelableTimer struct {
-	timer       *time.Timer
-	cancelTimer chan struct{}
+	Timer       *time.Timer
+	CancelTimer chan struct{}
 	durationSec int
 }
 
-func NewVehicle(topic string, scenario *Scenario) *Vehicle {
+func NewVehicle(topic string, scenario *scenario2.Scenario) *Vehicle {
 	vehicle := new(Vehicle)
 	vehicle.daemonTopic = topic + "/daemon"
 	vehicle.industrialPortalTopic = topic + "/industrial_portal"
 	vehicle.sessionId = ""
 	vehicle.connectionState = CONNECTION_DISCONNECTED
 	vehicle.vehicleState = pb.CarStatus_ERROR
-	vehicle.timeoutTimer = CancelableTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 30}
-	vehicle.responseTimer = CancelableTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 10}
+	vehicle.timeoutTimer = CancelableTimer{Timer: nil, CancelTimer: make(chan struct{}), durationSec: 30}
+	vehicle.responseTimer = CancelableTimer{Timer: nil, CancelTimer: make(chan struct{}), durationSec: 10}
 	vehicle.scenario = scenario
 	return vehicle
 }
@@ -135,8 +136,8 @@ func (vehicle *Vehicle) parseCommandResponse(message *pb.CommandResponse) {
 	vehicle.connectionValidityCheck(message.SessionId, "command response")
 	vehicle.resetTimeoutTimer()
 
-	if vehicle.responseTimer.timer != nil {
-		vehicle.responseTimer.cancelTimer <- struct{}{}
+	if vehicle.responseTimer.Timer != nil {
+		vehicle.responseTimer.CancelTimer <- struct{}{}
 	} else {
 		panic(fmt.Sprintf("Received unexpected command response from (%v)", vehicle.daemonTopic))
 	}
@@ -157,21 +158,21 @@ func (vehicle *Vehicle) changeState(state int) {
 }
 
 func (vehicle *Vehicle) resetTimeoutTimer() {
-	if vehicle.timeoutTimer.timer == nil {
-		vehicle.timeoutTimer.timer = time.NewTimer(time.Duration(vehicle.timeoutTimer.durationSec) * time.Second)
+	if vehicle.timeoutTimer.Timer == nil {
+		vehicle.timeoutTimer.Timer = time.NewTimer(time.Duration(vehicle.timeoutTimer.durationSec) * time.Second)
 
 	} else {
-		vehicle.timeoutTimer.timer.Reset(time.Duration(vehicle.timeoutTimer.durationSec) * time.Second)
+		vehicle.timeoutTimer.Timer.Reset(time.Duration(vehicle.timeoutTimer.durationSec) * time.Second)
 	}
 	go func() {
 		select {
-		case <-vehicle.timeoutTimer.timer.C:
+		case <-vehicle.timeoutTimer.Timer.C:
 			log.Printf("[WARNING] [%v] Vehicle timeout, reseting state!\n", vehicle.scenario.topic)
 			if vehicle.connectionState != CONNECTION_DISCONNECTED {
 				vehicle.resetVehicle()
 			}
-		case <-vehicle.timeoutTimer.cancelTimer:
-			vehicle.timeoutTimer.timer = nil
+		case <-vehicle.timeoutTimer.CancelTimer:
+			vehicle.timeoutTimer.Timer = nil
 			log.Printf("[INFO] [%v] Deleting timeout timer!\n", vehicle.scenario.topic)
 		}
 
@@ -179,20 +180,20 @@ func (vehicle *Vehicle) resetTimeoutTimer() {
 }
 
 func (vehicle *Vehicle) startResponseTimer() {
-	if vehicle.responseTimer.timer == nil {
-		vehicle.responseTimer.timer = time.NewTimer(time.Duration(vehicle.responseTimer.durationSec) * time.Second)
+	if vehicle.responseTimer.Timer == nil {
+		vehicle.responseTimer.Timer = time.NewTimer(time.Duration(vehicle.responseTimer.durationSec) * time.Second)
 	} else {
-		vehicle.responseTimer.timer.Reset(time.Duration(vehicle.responseTimer.durationSec) * time.Second)
+		vehicle.responseTimer.Timer.Reset(time.Duration(vehicle.responseTimer.durationSec) * time.Second)
 	}
 	go func() {
 		select {
-		case <-vehicle.responseTimer.timer.C:
+		case <-vehicle.responseTimer.Timer.C:
 			log.Printf("[WARNING] [%s] Vehicle failed to send command response\n", vehicle.scenario.topic)
 			if vehicle.connectionState != CONNECTION_DISCONNECTED {
 				vehicle.resetVehicle()
 			}
-		case <-vehicle.responseTimer.cancelTimer:
-			vehicle.responseTimer.timer = nil
+		case <-vehicle.responseTimer.CancelTimer:
+			vehicle.responseTimer.Timer = nil
 			log.Printf("[INFO] [%v] Deleting response timer!\n", vehicle.scenario.topic)
 		}
 	}()
@@ -203,16 +204,16 @@ func (vehicle *Vehicle) resetVehicle() {
 	vehicle.changeState(CONNECTION_DISCONNECTED)
 	vehicle.sessionId = ""
 	vehicle.vehicleState = pb.CarStatus_ERROR
-	if vehicle.timeoutTimer.timer != nil {
-		vehicle.timeoutTimer.timer.Stop()
-		vehicle.timeoutTimer.cancelTimer <- struct{}{}
+	if vehicle.timeoutTimer.Timer != nil {
+		vehicle.timeoutTimer.Timer.Stop()
+		vehicle.timeoutTimer.CancelTimer <- struct{}{}
 	}
-	if vehicle.responseTimer.timer != nil {
-		vehicle.responseTimer.timer.Stop()
-		vehicle.responseTimer.cancelTimer <- struct{}{}
+	if vehicle.responseTimer.Timer != nil {
+		vehicle.responseTimer.Timer.Stop()
+		vehicle.responseTimer.CancelTimer <- struct{}{}
 	}
-	vehicle.timeoutTimer = CancelableTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 30}
-	vehicle.responseTimer = CancelableTimer{timer: nil, cancelTimer: make(chan struct{}), durationSec: 10}
+	vehicle.timeoutTimer = CancelableTimer{Timer: nil, CancelTimer: make(chan struct{}), durationSec: 30}
+	vehicle.responseTimer = CancelableTimer{Timer: nil, CancelTimer: make(chan struct{}), durationSec: 10}
 
 }
 

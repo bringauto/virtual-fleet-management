@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"virtual_fleet_management/pkg/scenario"
 
 	//proto "google.golang.org/protobuf"
 	proto "github.com/golang/protobuf/proto"
@@ -25,7 +26,7 @@ func GetIndustrialPortalStatusResponse(sessionId string) []byte {
 	return getBinaryFromMessage(&message)
 }
 
-func GetIndustrialPortalCommand(action pb.CarCommand_Action, stops []string, route string, sessionId string, stations []StationStruct) []byte {
+func GetIndustrialPortalCommand(action pb.CarCommand_Action, stops []string, route string, sessionId string, stations []scenario.StationStruct) []byte {
 	stopList := []*pb.Stop{}
 	for _, element := range stops {
 		stopList = append(stopList, &pb.Stop{To: element})
@@ -34,7 +35,7 @@ func GetIndustrialPortalCommand(action pb.CarCommand_Action, stops []string, rou
 	stationList := []*pb.Station{}
 	if stations != nil {
 		for _, station := range stations {
-			stationList = append(stationList, &pb.Station{Name: station.Name, Position: &pb.Station_Position{Latitude: station.Position.Latitude, Longitude: station.Position.Longitude, Altitude: station.Position.Altitude}})
+			stationList = append(stationList, &pb.Station{Name: station.Name, scenario.Position: &pb.Station_Position{Latitude: station.Position.Latitude, Longitude: station.Position.Longitude, Altitude: station.Position.Altitude}})
 		}
 	}
 
@@ -63,7 +64,7 @@ func GetDaemonCommandResponse(sessionId string) []byte {
 func GetDaemonStatus(latitude, longtitude, altitude, speed, fuel float64, sessionId, stopTo string, serverErrorType pb.Status_ServerError_Type, finishedStops []string) []byte {
 
 	var position = pb.CarStatus_Position{Latitude: latitude, Longitude: altitude, Altitude: altitude}
-	var telemetry = pb.CarStatus_Telemetry{Speed: speed, Fuel: fuel, Position: &position}
+	var telemetry = pb.CarStatus_Telemetry{Speed: speed, Fuel: fuel, scenario.Position: &position}
 	var stop = pb.Stop{To: stopTo}
 	var carStatus = pb.CarStatus{Telemetry: &telemetry, State: pb.CarStatus_DRIVE, Stop: &stop}
 
