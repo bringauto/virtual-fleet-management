@@ -1,6 +1,9 @@
 package scenario
 
-import "log"
+import (
+	"fmt"
+	"log"
+)
 
 type ScenarioStruct struct {
 	Map      string          `json:"map"`
@@ -39,13 +42,14 @@ type Scenario struct {
 	routes   []RouteStruct
 }
 
-func NewScenario(scenarioStruct ScenarioStruct, carId string) *Scenario {
-	scenario := new(Scenario)
-	scenario.carId = carId
-	scenario.missions = scenarioStruct.Missions
-	scenario.routes = scenarioStruct.Routes
+func NewScenario(scenarioStruct ScenarioStruct, carId string) Scenario {
+	scenario := Scenario{
+		carId:    carId,
+		missions: scenarioStruct.Missions,
+		routes:   scenarioStruct.Routes,
+	}
 	if !scenario.isValid() {
-		return nil
+		panic(fmt.Sprintf("[ERROR] Scenario for car %v is not valid", carId))
 	}
 	return scenario
 }
@@ -54,7 +58,6 @@ func (scenario *Scenario) isValid() bool {
 	for _, mission := range scenario.missions {
 		if !scenario.areStopsOnRoute(mission) {
 			log.Printf("[ERROR] Scenario %v: Stops in mission %v are not on the route %v\n.", scenario.carId, mission.Name, mission.Route)
-			// TODO panic?
 			return false
 		}
 	}
