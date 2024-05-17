@@ -18,7 +18,7 @@ func GetCarIdList(pathToScenarioFolder string) []string {
 	return cars
 }
 
-func GetScenario(carId, scenarioPath string) *Scenario {
+func GetScenario(carId, scenarioPath string) Scenario {
 	dirs, files := getListsOfDirsAndFiles(scenarioPath + "/" + carId)
 	var scenarioStruct ScenarioStruct
 	if len(dirs) != 0 {
@@ -43,15 +43,15 @@ func GetScenario(carId, scenarioPath string) *Scenario {
 		}
 	}
 
-	if scenarioStruct.Missions == nil {
-		log.Printf("[WARNING] [%v] Found scenario files %v, don't contain missions\n", carId, files)
-		return nil
-	} else if scenarioStruct.Routes == nil {
-		log.Printf("[WARNING] [%v] Found scenario files %v, don't contain routes\n", carId, files)
-		return nil
-	}
-	log.Printf("[INFO] [%v] Found scenario files %v, creating scenario %v Missions: %v Routes: %v\n", carId, files, scenarioStruct.Map, scenarioStruct.Missions, scenarioStruct.Routes)
+	//if scenarioStruct.Missions == nil {
+	//	log.Printf("[WARNING] [%v] Found scenario files %v, don't contain missions\n", carId, files)
+	//	return nil
+	//} else if scenarioStruct.Routes == nil {
+	//	log.Printf("[WARNING] [%v] Found scenario files %v, don't contain routes\n", carId, files)
+	//	return nil
+	//}
 	scenario := NewScenario(scenarioStruct, carId)
+	log.Printf("[INFO] [%v] Found scenario files %v, creating scenario %v Missions: %v Routes: %v\n", carId, files, scenarioStruct.Map, scenario.missions, scenario.routes)
 	return scenario
 
 }
