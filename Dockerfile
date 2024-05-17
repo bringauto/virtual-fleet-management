@@ -1,11 +1,10 @@
-FROM golang:1.16-alpine
-WORKDIR /virtual-fleet
-COPY . /virtual-fleet/tmp
-RUN chmod +x ./tmp/scripts/docker_build.sh
-RUN sh ./tmp/scripts/docker_build.sh
-RUN mv ./tmp/virtual-fleet-app ./
+FROM golang:1.21-alpine
+
+RUN apk add --no-cache bash
+WORKDIR /home/bringauto/virtual-fleet-management
+COPY . /home/bringauto/virtual-fleet-management/tmp
+RUN #chmod +x ./tmp/scripts/docker_build.sh
+RUN bash ./tmp/build.sh
+RUN mv ./tmp/virtual-fleet-management ./
+RUN mkdir -p config && cp ./tmp/resources/config/for_docker.json ./config/config.json
 RUN rm -r ./tmp
-#port without ssl
-EXPOSE 1883
-#port with ssl
-EXPOSE 8883

@@ -1,0 +1,58 @@
+{
+    "map": "Brno.osm",
+    "starting_station": "Lidická",
+    "missions": [
+        {
+            "delay_seconds": 0,
+            "name": "mission1",
+            "stops": [
+                {
+                    "name": "Lidická"
+                },
+                {
+                    "name": "Drobného"
+                }
+            ],
+            "route": "Lužánky"
+        },
+        {
+            "delay_seconds": 180,
+            "name": "mission2",
+            "stops": [
+                {
+                    "name": "Lidická"
+                },
+                {
+                    "name": "Lidická"
+                },
+                {
+                    "name": "Drobného"
+                }
+            ],
+            "route": "Lužánky"
+        }
+    ],
+    "routes": [
+        {
+            "name": "Lužánky",
+            "stations": [
+                {
+                    "name": "Lidická",
+                    "position": {
+                        "latitude": 49.20411899128,
+                        "longitude": 16.6067254436,
+                        "altitude": 0
+                    }
+                },
+                {
+                    "name": "Drobného",
+                    "position": {
+                        "latitude": 49.20500309523,
+                        "longitude": 16.61337934367,
+                        "altitude": 0
+                    }
+                }
+            ]
+        }
+    ]
+}

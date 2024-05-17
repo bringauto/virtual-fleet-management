@@ -1,9 +1,10 @@
 .vscode
-*.mod
-*.sum
+.idea
+go.sum
 main
-*.txt
 app
 *.zip
 *.log
+*.tar.gz
 virtual-fleet-app
+virtual-fleet-management
