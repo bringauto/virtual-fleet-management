@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"time"
+	"virtual_fleet_management/pkg/scenario"
 
 	"github.com/eclipse/paho.golang/paho"
 )
@@ -14,8 +15,8 @@ type MQTTClient struct {
 	msgChan                    chan *paho.Publish
 	server, username, password string
 	tcpCon                     net.Conn
-	vehicles				   []*Vehicle
-	qos						   byte
+	vehicles                   []*Vehicle
+	qos                        byte
 }
 
 var Client = MQTTClient{}
@@ -23,11 +24,11 @@ var Client = MQTTClient{}
 func (mqttClient *MQTTClient) Start(server, username, password string, scenariosPath string, loop bool, qos byte) {
 	log.Printf("[INFO] Connecting to broker at %v\n", server)
 
-    defer func() {
-        if r := recover(); r != nil {
-            log.Printf("[ERROR] Error occured in mqqtClient start: %v\n", r)
-        }
-    }()
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("[ERROR] Error occured in mqqtClient start: %v\n", r)
+		}
+	}()
 
 	mqttClient.server = server
 	mqttClient.username = username
@@ -36,10 +37,10 @@ func (mqttClient *MQTTClient) Start(server, username, password string, scenarios
 
 	mqttClient.msgChan = make(chan *paho.Publish)
 
-	topics := GetListOfTopics(scenariosPath)
+	topics := scenario.GetCarIdList(scenariosPath)
 
-	for _, topic := range topics{
-		scenario := GetScenario(topic, scenariosPath, loop)
+	for _, topic := range topics {
+		scenario := scenario.GetScenario(topic, scenariosPath, loop)
 		mqttClient.vehicles = append(mqttClient.vehicles, NewVehicle(topic, scenario))
 	}
 
@@ -170,7 +171,7 @@ func (mqttClient *MQTTClient) subscribe() {
 			log.Printf("[ERROR] [%v] Failed to subscribe to deamon topic: %d\n", vehicle.scenario.topic, err)
 		}
 		if sa.Reasons[0] != mqttClient.qos {
-			log.Printf("[ERROR] [%v] Failed to subscribe to deamon topic: %d\n",vehicle.scenario.topic, sa.Reasons[0])
+			log.Printf("[ERROR] [%v] Failed to subscribe to deamon topic: %d\n", vehicle.scenario.topic, sa.Reasons[0])
 		}
 		log.Printf("[INFO] [%v] Subscribed to deamon topic\n", vehicle.scenario.topic)
 	}
