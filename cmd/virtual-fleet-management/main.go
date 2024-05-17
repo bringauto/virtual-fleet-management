@@ -25,7 +25,7 @@ func main() {
 
 	var allScenarios []scenario.Scenario
 	for _, car := range cars {
-		allScenarios = append(allScenarios, *scenario.GetScenario(car, *scenariosPath))
+		allScenarios = append(allScenarios, scenario.GetScenario(car, *scenariosPath))
 	}
 
 	//var url = *brokerIp + ":" + *brokerPort
