@@ -8,13 +8,14 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"virtual_fleet_management/pkg/http_client"
 	"virtual_fleet_management/pkg/scenario"
 )
 
 func main() {
 
-	//brokerIp := flag.String("broker-ip", "127.0.0.1", "IPv4 address of MQTT broker")
-	//brokerPort := flag.String("broker-port", "1883", "Port of MQTT broker")
+	hostIp := flag.String("host", "http://172.18.0.1:8081", "IPv4 address")
+	apiKey := flag.String("api-key", "123456", "API key")
 	logPath := flag.String("log-path", "./", "Path for log file")
 	scenariosPath := flag.String("scenario-dir", "./scenarios/virtual_vehicle", "Path of scenarios folder")
 	//loop := flag.Bool("loop", false, "Set true if scenarios should be run in loops")
@@ -28,6 +29,8 @@ func main() {
 		allScenarios = append(allScenarios, scenario.GetScenario(car, *scenariosPath))
 	}
 
+	client := http_client.CreateClient(*hostIp, *apiKey)
+	client.AddStop(allScenarios[0].Routes[0].Stations[1])
 	//var url = *brokerIp + ":" + *brokerPort
 
 	//setSignalHandler()
