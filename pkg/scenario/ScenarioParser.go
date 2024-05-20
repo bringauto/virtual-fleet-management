@@ -44,14 +44,14 @@ func GetScenario(carId, scenarioPath string) Scenario {
 	}
 
 	//if scenarioStruct.Missions == nil {
-	//	log.Printf("[WARNING] [%v] Found scenario files %v, don't contain missions\n", carId, files)
+	//	log.Printf("[WARNING] [%v] Found scenario files %v, don't contain missions\n", CarId, files)
 	//	return nil
 	//} else if scenarioStruct.Routes == nil {
-	//	log.Printf("[WARNING] [%v] Found scenario files %v, don't contain routes\n", carId, files)
+	//	log.Printf("[WARNING] [%v] Found scenario files %v, don't contain routes\n", CarId, files)
 	//	return nil
 	//}
 	scenario := NewScenario(scenarioStruct, carId)
-	log.Printf("[INFO] [%v] Found scenario files %v, creating scenario %v Missions: %v Routes: %v\n", carId, files, scenarioStruct.Map, scenario.missions, scenario.routes)
+	log.Printf("[INFO] [%v] Found scenario files %v, creating scenario %v Missions: %v Routes: %v\n", carId, files, scenarioStruct.Map, scenario.Missions, scenario.Routes)
 	return scenario
 
 }

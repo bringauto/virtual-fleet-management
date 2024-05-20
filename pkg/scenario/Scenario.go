@@ -21,9 +21,9 @@ type MissionStruct struct {
 }
 
 type Position struct {
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
-	Altitude  float64 `json:"altitude"`
+	Latitude  float32 `json:"latitude"`
+	Longitude float32 `json:"longitude"`
+	Altitude  float32 `json:"altitude"`
 }
 
 type StationStruct struct {
@@ -37,16 +37,16 @@ type RouteStruct struct {
 }
 
 type Scenario struct {
-	carId    string
-	missions []MissionStruct
-	routes   []RouteStruct
+	CarId    string
+	Missions []MissionStruct
+	Routes   []RouteStruct
 }
 
 func NewScenario(scenarioStruct ScenarioStruct, carId string) Scenario {
 	scenario := Scenario{
-		carId:    carId,
-		missions: scenarioStruct.Missions,
-		routes:   scenarioStruct.Routes,
+		CarId:    carId,
+		Missions: scenarioStruct.Missions,
+		Routes:   scenarioStruct.Routes,
 	}
 	if !scenario.isValid() {
 		panic(fmt.Sprintf("[ERROR] Scenario for car %v is not valid", carId))
@@ -55,9 +55,9 @@ func NewScenario(scenarioStruct ScenarioStruct, carId string) Scenario {
 }
 
 func (scenario *Scenario) isValid() bool {
-	for _, mission := range scenario.missions {
+	for _, mission := range scenario.Missions {
 		if !scenario.areStopsOnRoute(mission) {
-			log.Printf("[ERROR] Scenario %v: Stops in mission %v are not on the route %v\n.", scenario.carId, mission.Name, mission.Route)
+			log.Printf("[ERROR] Scenario %v: Stops in mission %v are not on the route %v\n.", scenario.CarId, mission.Name, mission.Route)
 			return false
 		}
 	}
@@ -85,7 +85,7 @@ func containsStation(stations []StationStruct, stationName string) bool {
 }
 
 func (scenario *Scenario) getStations(routeName string) (stationList []StationStruct) {
-	for _, route := range scenario.routes {
+	for _, route := range scenario.Routes {
 		if route.Name == routeName {
 			return route.Stations
 		}
@@ -95,7 +95,7 @@ func (scenario *Scenario) getStations(routeName string) (stationList []StationSt
 }
 
 func (scenario *Scenario) getAllStations() (stationList []StationStruct) {
-	for _, route := range scenario.routes {
+	for _, route := range scenario.Routes {
 		for _, station := range route.Stations {
 			stationList = append(stationList, station)
 		}
@@ -104,7 +104,7 @@ func (scenario *Scenario) getAllStations() (stationList []StationStruct) {
 }
 
 func (scenario *Scenario) getAllMissionStops() (stopList []string) {
-	for _, mission := range scenario.missions {
+	for _, mission := range scenario.Missions {
 		for _, stop := range mission.Stops {
 			stopList = append(stopList, stop.Name)
 		}
