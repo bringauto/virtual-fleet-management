@@ -60,7 +60,7 @@ func convertPositionToGnss(position scenario.Position) openapi.GNSSPosition {
 func (c *Client) GetStops() []openapi.Stop {
 	stopData, _, err := c.apiClient.StopAPI.GetStops(c.auth).Execute()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(`[ERROR] calling 'StopAPI.GetStops': `, err)
 	}
 	return stopData
 }
@@ -70,7 +70,7 @@ func (c *Client) AddStop(stationStruct scenario.StationStruct) (stopId *int32) {
 	newStop := openapi.NewStop(stationStruct.Name, convertPositionToGnss(stationStruct.Position))
 	stopData, _, err := c.apiClient.StopAPI.CreateStop(c.auth).Stop(*newStop).Execute()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(`[ERROR] calling 'StopApi.CreateStop' with stop: '`, newStop.Name, `' error: `, err)
 	}
 	return stopData.Id
 }
@@ -78,7 +78,7 @@ func (c *Client) AddStop(stationStruct scenario.StationStruct) (stopId *int32) {
 func (c *Client) GetRoutes() []openapi.Route {
 	routeData, _, err := c.apiClient.RouteAPI.GetRoutes(c.auth).Execute()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(`[ERROR] calling 'RouteAPI.GetRoutes': `, err)
 	}
 	return routeData
 }
@@ -86,7 +86,15 @@ func (c *Client) GetRoutes() []openapi.Route {
 func (c *Client) AddRoute(route *openapi.Route) (routeId *int32) {
 	routeData, _, err := c.apiClient.RouteAPI.CreateRoute(c.auth).Route(*route).Execute()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(`[ERROR] calling 'RouteAPI.CreateRoute':`, err)
 	}
 	return routeData.Id
+}
+
+func (c *Client) GetCars() []openapi.Car {
+	carData, _, err := c.apiClient.CarAPI.GetCars(c.auth).Execute()
+	if err != nil {
+		log.Fatal(`[ERROR] calling 'CarAPI.GetCars': `, err)
+	}
+	return carData
 }
