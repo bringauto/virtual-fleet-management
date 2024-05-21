@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"virtual_fleet_management/pkg/http_client"
 	"virtual_fleet_management/pkg/scenario"
+	"virtual_fleet_management/pkg/simulation"
 )
 
 func main() {
@@ -18,7 +19,7 @@ func main() {
 	apiKey := flag.String("api-key", "123456", "API key")
 	logPath := flag.String("log-path", "./", "Path for log file")
 	scenariosPath := flag.String("scenario-dir", "./scenarios/virtual_vehicle", "Path of scenarios folder")
-	//loop := flag.Bool("loop", false, "Set true if scenarios should be run in loops")
+	loop := flag.Bool("loop", false, "Set true if scenarios should be run in loops")
 
 	flag.Parse()
 	setUpLogger(*logPath)
@@ -27,6 +28,11 @@ func main() {
 	var allScenarios []scenario.Scenario
 	for _, car := range cars {
 		allScenarios = append(allScenarios, scenario.GetScenario(car, *scenariosPath))
+	}
+
+	var simulations map[string]simulation.Simulation
+	for _, currScenario := range allScenarios {
+		simulations[currScenario.CarId] = simulation.New(currScenario, *loop)
 	}
 
 	client := http_client.CreateClient(*hostIp, *apiKey)
