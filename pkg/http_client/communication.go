@@ -11,6 +11,7 @@ import (
 type Client struct {
 	apiClient *openapi.APIClient
 	auth      context.Context
+	userId    int32
 }
 
 // createConfiguration Create configuration for client
@@ -22,7 +23,6 @@ func createConfiguration(host string) *openapi.Configuration {
 	config := openapi.NewConfiguration()
 	config.Host = u.Host
 	config.Scheme = u.Scheme
-	//config.APIKeyPrefix["api_key"] = apiKey
 	return config
 }
 
@@ -42,9 +42,12 @@ func CreateClient(host string, key string) *Client {
 		log.Fatal("[ERROR] ", err)
 	}
 
+	// TODO: get userId from management api
+
 	return &Client{
 		apiClient: apiClient,
 		auth:      auth,
+		userId:    1, // TODO not implemented in management api
 	}
 }
 
@@ -97,4 +100,12 @@ func (c *Client) GetCars() []openapi.Car {
 		log.Fatal(`[ERROR] calling 'CarAPI.GetCars': `, err)
 	}
 	return carData
+}
+
+func (c *Client) AddOrder(carId int32, stopId int32, routeId int32) {
+	order := openapi.NewOrder(c.userId, carId, stopId, routeId)
+	_, _, err := c.apiClient.OrderAPI.CreateOrder(c.auth).Order(*order).Execute()
+	if err != nil {
+		log.Fatal(`[ERROR] calling 'OrderAPI.CreateOrder': `, err)
+	}
 }

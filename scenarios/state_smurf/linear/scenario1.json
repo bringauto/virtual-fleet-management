@@ -1,5 +1,5 @@
 {
-	"map": "smurfTest.osm",
+	"map": "linear.osm",
 	"missions": [
 		{
 		 "timestamp": "5",
@@ -19,5 +19,53 @@
 			],
 			"route": "default"
 		}
-	]
+	],
+	"routes": [
+	{
+		"name": "default",
+		"stations": [
+			{
+				"name": "first",
+				"position": {
+					"latitude": 49.22863941855,
+					"longitude": 16.59438414031,
+					"altitude": 0
+				}
+			},
+			{
+				"name": "second",
+				"position": {
+					"latitude": 49.22767,
+					"longitude": 16.59242,
+					"altitude": 0
+				}
+			},
+			{
+				"name": "third",
+				"position": {
+					"latitude": 49.22596,
+					"longitude": 16.59349,
+					"altitude": 0
+				}
+			},
+			{
+				"name": "fourth",
+				"position": {
+					"latitude": 49.22571,
+					"longitude": 16.59643,
+					"altitude": 0
+				}
+			},
+			{
+				"name": "fifth",
+				"position": {
+					"latitude": 49.22823,
+					"longitude": 16.59514,
+					"altitude": 0
+				}
+			}
+
+		]
+	}
+]
 }

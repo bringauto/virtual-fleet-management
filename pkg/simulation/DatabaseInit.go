@@ -45,7 +45,7 @@ func findRouteId(route *openapi.Route, existingRoutes []openapi.Route) *int32 {
 	return nil
 
 }
-func (simulation Simulation) initDatabase(scenario2 scenario.Scenario) {
+func (simulation *Simulation) initDatabase(scenario2 scenario.Scenario) {
 	existingStations := simulation.client.GetStops()
 	for _, route := range scenario2.Routes {
 		var stopIds []int32
