@@ -15,8 +15,23 @@ import (
 	"virtual_fleet_management/pkg/simulation"
 )
 
-func main() {
+const sleepTime = 10
 
+func main() {
+	hostIp, apiKey, logPath, scenariosPath, loop := parseFlags()
+
+	setUpLogger(logPath)
+	setSignalHandler()
+
+	allScenarios := getAllScenarios(scenariosPath)
+	client := http_client.CreateClient(hostIp, apiKey)
+
+	simulations := createSimulations(allScenarios, loop, client)
+
+	startNewCars(client, simulations)
+}
+
+func parseFlags() (string, string, string, string, bool) {
 	hostIp := flag.String("host", "http://127.0.0.1:8081", "IPv4 address")
 	apiKey := flag.String("api-key", "123456", "API key")
 	logPath := flag.String("log-path", "./", "Path for log file")
@@ -24,31 +39,32 @@ func main() {
 	loop := flag.Bool("loop", false, "Set true if scenarios should be run in loops")
 
 	flag.Parse()
-	setUpLogger(*logPath)
-	setSignalHandler()
 
-	cars := scenario.GetCarIdList(*scenariosPath)
+	return *hostIp, *apiKey, *logPath, *scenariosPath, *loop
+}
 
-	var allScenarios []scenario.Scenario
+func getAllScenarios(scenariosPath string) (allScenarios []scenario.Scenario) {
+	cars := scenario.GetCarIdList(scenariosPath)
+
 	for _, car := range cars {
-		allScenarios = append(allScenarios, scenario.GetScenario(car, *scenariosPath))
+		allScenarios = append(allScenarios, scenario.GetScenario(car, scenariosPath))
 	}
+	return allScenarios
+}
 
-	client := http_client.CreateClient(*hostIp, *apiKey)
-
+func createSimulations(allScenarios []scenario.Scenario, loop bool, client *http_client.Client) map[string]*simulation.Simulation {
 	var simulations = make(map[string]*simulation.Simulation)
 	for _, currScenario := range allScenarios {
-		simulations[currScenario.CarId] = simulation.New(currScenario, *loop, client)
+		simulations[currScenario.CarId] = simulation.New(currScenario, loop, client)
 	}
+	return simulations
+}
 
+// TODO rename, move into Simulation??
+func startNewCars(client *http_client.Client, simulations map[string]*simulation.Simulation) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	startNewCars(client, simulations)
-	wg.Wait() // Wait for all goroutines to finish
-}
-
-func startNewCars(client *http_client.Client, simulations map[string]*simulation.Simulation) {
 	existingCars := make(map[int32]bool)
 
 	go func() { // Start a new goroutine
@@ -70,9 +86,11 @@ func startNewCars(client *http_client.Client, simulations map[string]*simulation
 			}
 
 			// Sleep for a while before the next iteration to avoid busy looping.
-			time.Sleep(10 * time.Second) // TODO timeout
+			time.Sleep(sleepTime * time.Second)
 		}
 	}()
+
+	wg.Wait() // Wait for all goroutines to finish
 }
 
 func setUpLogger(path string) {
