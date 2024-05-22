@@ -10,9 +10,9 @@ import (
 	"sync"
 	"syscall"
 	"time"
-	"virtual_fleet_management/pkg/http_client"
-	"virtual_fleet_management/pkg/scenario"
-	"virtual_fleet_management/pkg/simulation"
+	"virtual-fleet-management/pkg/http"
+	"virtual-fleet-management/pkg/scenario"
+	"virtual-fleet-management/pkg/simulation"
 )
 
 const sleepTime = 10
@@ -24,7 +24,7 @@ func main() {
 	setSignalHandler()
 
 	allScenarios := getAllScenarios(scenariosPath)
-	client := http_client.CreateClient(hostIp, apiKey)
+	client := http.CreateClient(hostIp, apiKey)
 
 	simulations := createSimulations(allScenarios, loop, client)
 
@@ -52,7 +52,7 @@ func getAllScenarios(scenariosPath string) (allScenarios []scenario.Scenario) {
 	return allScenarios
 }
 
-func createSimulations(allScenarios []scenario.Scenario, loop bool, client *http_client.Client) map[string]*simulation.Simulation {
+func createSimulations(allScenarios []scenario.Scenario, loop bool, client *http.Client) map[string]*simulation.Simulation {
 	var simulations = make(map[string]*simulation.Simulation)
 	for _, currScenario := range allScenarios {
 		simulations[currScenario.CarId] = simulation.New(currScenario, loop, client)
@@ -61,7 +61,7 @@ func createSimulations(allScenarios []scenario.Scenario, loop bool, client *http
 }
 
 // TODO rename, move into Simulation??
-func startNewCars(client *http_client.Client, simulations map[string]*simulation.Simulation) {
+func startNewCars(client *http.Client, simulations map[string]*simulation.Simulation) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 

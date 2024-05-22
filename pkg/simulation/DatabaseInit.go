@@ -5,8 +5,8 @@ import (
 	"log"
 	"math"
 	"reflect"
-	"virtual_fleet_management/pkg/http_client"
-	"virtual_fleet_management/pkg/scenario"
+	"virtual-fleet-management/pkg/http"
+	"virtual-fleet-management/pkg/scenario"
 )
 
 const gpsEqualityThreshold = 1e-6
@@ -46,7 +46,7 @@ func findRouteId(route *openapi.Route, existingRoutes []openapi.Route) *int32 {
 	return nil
 
 }
-func (simulation *Simulation) initDatabase(scenario2 scenario.Scenario, client *http_client.Client) (map[string]int32, map[string]int32) {
+func (simulation *Simulation) initDatabase(scenario2 scenario.Scenario, client *http.Client) (map[string]int32, map[string]int32) {
 	stopIds := make(map[string]int32)
 	routeIds := make(map[string]int32)
 	existingStations := client.GetStops()

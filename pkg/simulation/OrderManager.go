@@ -2,17 +2,17 @@ package simulation
 
 import (
 	openapi "github.com/bringauto/fleet-management-http-client-go"
-	"virtual_fleet_management/pkg/http_client"
+	"virtual-fleet-management/pkg/http"
 )
 
 type OrderManager struct {
-	client   *http_client.Client
+	client   *http.Client
 	routeIds map[string]int32
 	stopIds  map[string]int32
 	carId    *int32
 }
 
-func newOrderManager(client *http_client.Client, routeIds map[string]int32, stopIds map[string]int32) *OrderManager {
+func newOrderManager(client *http.Client, routeIds map[string]int32, stopIds map[string]int32) *OrderManager {
 	return &OrderManager{
 		client:   client,
 		routeIds: routeIds,
