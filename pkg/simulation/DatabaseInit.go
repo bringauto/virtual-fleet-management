@@ -5,6 +5,7 @@ import (
 	"log"
 	"math"
 	"reflect"
+	"virtual_fleet_management/pkg/http_client"
 	"virtual_fleet_management/pkg/scenario"
 )
 
@@ -45,25 +46,28 @@ func findRouteId(route *openapi.Route, existingRoutes []openapi.Route) *int32 {
 	return nil
 
 }
-func (simulation *Simulation) initDatabase(scenario2 scenario.Scenario) {
-	existingStations := simulation.client.GetStops()
+func (simulation *Simulation) initDatabase(scenario2 scenario.Scenario, client *http_client.Client) (map[string]int32, map[string]int32) {
+	stopIds := make(map[string]int32)
+	routeIds := make(map[string]int32)
+	existingStations := client.GetStops()
 	for _, route := range scenario2.Routes {
-		var stopIds []int32
+		var routeStopIds []int32
 		for _, station := range route.Stations {
 			stationId := findStationId(station, existingStations)
 			if stationId == nil {
-				stationId = simulation.client.AddStop(station)
+				stationId = client.AddStop(station)
 			}
-			stopIds = append(stopIds, *stationId)
-			simulation.stopIds[station.Name] = *stationId
+			routeStopIds = append(routeStopIds, *stationId)
+			stopIds[station.Name] = *stationId
 
 		}
 		newRoute := openapi.NewRoute(route.Name)
-		newRoute.SetStopIds(stopIds)
-		routeId := findRouteId(newRoute, simulation.client.GetRoutes())
+		newRoute.SetStopIds(routeStopIds)
+		routeId := findRouteId(newRoute, client.GetRoutes())
 		if routeId == nil {
-			routeId = simulation.client.AddRoute(newRoute)
+			routeId = client.AddRoute(newRoute)
 		}
-		simulation.routeIds[route.Name] = *routeId
+		routeIds[route.Name] = *routeId
 	}
+	return routeIds, stopIds
 }
