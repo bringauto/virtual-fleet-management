@@ -1,11 +1,11 @@
-package http_client
+package http
 
 import (
 	"context"
 	openapi "github.com/bringauto/fleet-management-http-client-go"
 	"log"
 	"net/url"
-	"virtual_fleet_management/pkg/scenario"
+	"virtual-fleet-management/pkg/scenario"
 )
 
 type Client struct {
