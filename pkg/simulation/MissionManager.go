@@ -4,7 +4,7 @@ import (
 	"log"
 	"strconv"
 	"time"
-	"virtual_fleet_management/pkg/scenario"
+	"virtual-fleet-management/pkg/scenario"
 )
 
 type CancelableTimer struct {

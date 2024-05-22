@@ -2,8 +2,8 @@ package simulation
 
 import (
 	"log"
-	"virtual_fleet_management/pkg/http_client"
-	"virtual_fleet_management/pkg/scenario"
+	"virtual-fleet-management/pkg/http"
+	"virtual-fleet-management/pkg/scenario"
 )
 
 type Simulation struct {
@@ -13,7 +13,7 @@ type Simulation struct {
 	orderManager       *OrderManager
 }
 
-func New(simulationScenario scenario.Scenario, loop bool, client *http_client.Client) *Simulation {
+func New(simulationScenario scenario.Scenario, loop bool, client *http.Client) *Simulation {
 	simulation := new(Simulation)
 	simulation.simulationScenario = simulationScenario
 	simulation.loop = loop
