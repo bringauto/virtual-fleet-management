@@ -109,3 +109,20 @@ func (c *Client) AddOrder(carId int32, stopId int32, routeId int32) {
 		log.Fatal(`[ERROR] calling 'OrderAPI.CreateOrder': `, err)
 	}
 }
+
+func (c *Client) GetOrdersForCar(carId int32, since int64) []openapi.Order {
+	orders, _, err := c.apiClient.OrderAPI.GetCarOrders(c.auth, carId).Since(since).Execute()
+	if err != nil {
+		log.Fatal(`[ERROR] calling 'OrderAPI.GetCarOrders': `, err)
+
+	}
+	return orders
+}
+
+func (c *Client) CancelOrder(orderId int32) {
+	orderStatus := *openapi.NewOrderState(openapi.CANCELED, orderId)
+	s, r, err := c.apiClient.OrderStateAPI.CreateOrderState(c.auth).OrderState(orderStatus).Execute()
+	if err != nil {
+		log.Fatal(`[ERROR] cancelling order with 'OrderStateAPI.CreateOrderState': `, err, r, s)
+	}
+}
