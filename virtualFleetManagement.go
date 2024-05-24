@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	openapi "github.com/bringauto/fleet-management-http-client-go"
 	"io"
 	"log"
 	"os"
@@ -28,7 +29,7 @@ func main() {
 
 	simulations := createSimulations(allScenarios, loop, client)
 
-	startNewCars(client, simulations)
+	monitorAndStartNewCars(client, simulations)
 }
 
 func parseFlags() (string, string, string, string, bool) {
@@ -51,26 +52,30 @@ func createSimulations(allScenarios []scenario.Scenario, loop bool, client *http
 	return simulations
 }
 
-// TODO rename, move into Simulation??
-func startNewCars(client *http.Client, simulations map[string]*simulation.Simulation) {
-	var wg sync.WaitGroup
-	wg.Add(1)
+// Check if last status of the car is within the accepted delay
+func isVehicleCommunicating(car openapi.Car) bool {
+	const acceptedDelay = int64(2 * sleepTime * 1000)
+	carTime := *car.LastState.Timestamp + acceptedDelay
+	return carTime >= time.Now().UnixMilli()
+}
 
-	activeCars := make(map[int32]bool)
+func monitorAndStartNewCars(client *http.Client, simulations map[string]*simulation.Simulation) {
+	var waitGroup sync.WaitGroup
+	waitGroup.Add(len(simulations))
 
 	go func() { // Start a new goroutine
+		activeCars := make(map[int32]bool)
 		for {
 			cars := client.GetCars()
 			for _, car := range cars {
 				if _, active := activeCars[*car.Id]; !active {
-					// Check if the car is communicating with the server
-					if *car.LastState.Timestamp+int64(2*sleepTime) >= time.Now().UnixMilli() {
+					if isVehicleCommunicating(car) {
 						// If the car is not in the activeCars map, it's a new car.
 						activeCars[*car.Id] = true
 						// Start the simulation for the new car.
 						if carSimulation, ok := simulations[car.Name]; ok {
 							carSimulation.SetCarId(car.Id)
-							go carSimulation.Start() // Start the simulation in a new goroutine
+							go carSimulation.Start(&waitGroup) // Start the simulation in a new goroutine
 						} else {
 							log.Printf("[INFO] New car connected: %v, this car doesn't have any available scenario", car.Name)
 						}
@@ -83,7 +88,7 @@ func startNewCars(client *http.Client, simulations map[string]*simulation.Simula
 		}
 	}()
 
-	wg.Wait() // Wait for all goroutines to finish
+	waitGroup.Wait() // Wait for all goroutines to finish
 }
 
 func setUpLogger(path string) {
@@ -104,6 +109,7 @@ func setSignalHandler() {
 	go func() {
 		<-ic
 		fmt.Printf("[INFO] signal received, exiting\n")
+		// TODO do we want to cancell orders?
 		os.Exit(0)
 	}()
 }
