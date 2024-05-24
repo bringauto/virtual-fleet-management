@@ -12,9 +12,9 @@ type ScenarioStruct struct {
 }
 
 type MissionStruct struct {
-	Timestamp string `json:"timestamp"`
-	Name      string `json:"name"`
-	Stops     []struct {
+	DelaySeconds int32  `json:"delay_seconds"`
+	Name         string `json:"name"`
+	Stops        []struct {
 		Name string `json:"name"`
 	} `json:"stops"`
 	Route string `json:"route"`
@@ -94,20 +94,9 @@ func (scenario *Scenario) getStations(routeName string) (stationList []StationSt
 	return nil
 }
 
-func (scenario *Scenario) getAllStations() (stationList []StationStruct) {
-	for _, route := range scenario.Routes {
-		for _, station := range route.Stations {
-			stationList = append(stationList, station)
-		}
-	}
-	return stationList
-}
-
-func (scenario *Scenario) getAllMissionStops() (stopList []string) {
+func (scenario *Scenario) GetTotalDelay() (totalDelay int32) {
 	for _, mission := range scenario.Missions {
-		for _, stop := range mission.Stops {
-			stopList = append(stopList, stop.Name)
-		}
+		totalDelay += mission.DelaySeconds
 	}
-	return stopList
+	return totalDelay
 }

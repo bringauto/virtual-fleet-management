@@ -8,9 +8,16 @@ import (
 	"path/filepath"
 )
 
-// TODO func find scenarios in directory?
+func GetAllScenariosFromDir(scenariosPath string) (allScenarios []Scenario) {
+	cars := getCarIdList(scenariosPath)
 
-func GetCarIdList(pathToScenarioFolder string) []string {
+	for _, car := range cars {
+		allScenarios = append(allScenarios, getScenario(car, scenariosPath))
+	}
+	return allScenarios
+}
+
+func getCarIdList(pathToScenarioFolder string) []string {
 	var cars []string
 	cars, _ = getListsOfDirsAndFiles(pathToScenarioFolder)
 	log.Printf("[INFO] Found cars: %v\n", cars)
@@ -18,7 +25,7 @@ func GetCarIdList(pathToScenarioFolder string) []string {
 	return cars
 }
 
-func GetScenario(carId, scenarioPath string) Scenario {
+func getScenario(carId, scenarioPath string) Scenario {
 	dirs, files := getListsOfDirsAndFiles(scenarioPath + "/" + carId)
 	var scenarioStruct ScenarioStruct
 	if len(dirs) != 0 {

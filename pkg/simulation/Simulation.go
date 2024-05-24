@@ -2,6 +2,7 @@ package simulation
 
 import (
 	"log"
+	"time"
 	"virtual-fleet-management/pkg/http"
 	"virtual-fleet-management/pkg/scenario"
 )
@@ -35,6 +36,11 @@ func (simulation *Simulation) Start() {
 	log.Printf("[INFO] [%v] Starting simulation", simulation.simulationScenario.CarId)
 	simulation.resetSimulation()
 
+	// TODO sleep until the minimum time of mission
+	time.Sleep(time.Duration(simulation.simulationScenario.GetTotalDelay()) * time.Second)
+	for {
+		// TODO get order states
+	}
 	// TODO sleep until the mission is finished
 	if simulation.loop {
 		log.Printf("[INFO] [%v] Car have finished all of its missions, starting simulation again", simulation.simulationScenario.CarId)
