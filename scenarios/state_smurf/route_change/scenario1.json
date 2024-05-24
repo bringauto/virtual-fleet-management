@@ -2,7 +2,7 @@
 	"map": "route_change.osm",
 	"missions": [
 		{
-		 "timestamp": "5",
+		 "delay_seconds": 5,
 		 "name": "mission1",
 		 "stops": [
 			{"name": "first_route_stop"}
@@ -10,7 +10,7 @@
 			"route": "First"
 		},
 		{
-	 	 "timestamp": "20",
+	 	 "delay_seconds": 20,
 		 "name": "mission2",
 		 "stops": [
 			{"name": "second_route_stop"}

@@ -47,7 +47,7 @@ func CreateClient(host string, key string) *Client {
 	return &Client{
 		apiClient: apiClient,
 		auth:      auth,
-		userId:    1, // TODO not implemented in management api
+		userId:    1, // TODO not implemented in management api yet
 	}
 }
 

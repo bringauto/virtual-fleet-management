@@ -2,7 +2,6 @@ package simulation
 
 import (
 	"log"
-	"strconv"
 	"time"
 	"virtual-fleet-management/pkg/scenario"
 )
@@ -30,6 +29,10 @@ func NewMissionManager(carName string, orderManager *OrderManager) *MissionManag
 	return missionManager
 }
 
+func (missionManager *MissionManager) isMissionFinished() bool {
+	return len(missionManager.remainingMissions) == 0
+}
+
 func (missionManager *MissionManager) startMissions(missions []scenario.MissionStruct) {
 	missionManager.remainingMissions = missions
 	missionManager.startTimestamp = time.Now().Unix()
@@ -40,11 +43,7 @@ func (missionManager *MissionManager) startMissions(missions []scenario.MissionS
 
 func (missionManager *MissionManager) setNextMissionTimer() {
 	if len(missionManager.remainingMissions) > 0 {
-		missionTimeOffset, err := strconv.ParseInt(missionManager.remainingMissions[0].Timestamp, 10, 64)
-		if err != nil {
-			log.Printf("[INFO] [%v] Next mission (%v) timestamp has wrong format(%v), defaulting to 1 minute", missionManager.carName, missionManager.remainingMissions[0].Name, missionManager.remainingMissions[0].Timestamp)
-			missionTimeOffset = 60
-		}
+		missionTimeOffset := int64(missionManager.remainingMissions[0].DelaySeconds)
 		startNextMissionTimestamp := missionTimeOffset + missionManager.startTimestamp
 		calculatedTimerTime := startNextMissionTimestamp - time.Now().Unix()
 		if calculatedTimerTime < 1 {
@@ -83,7 +82,7 @@ func (missionManager *MissionManager) popNextMission() {
 	if len(missionManager.remainingMissions) > 0 {
 		missionManager.currentMission = missionManager.remainingMissions[0]
 		missionManager.remainingMissions = missionManager.remainingMissions[1:]
-		missionManager.orderManager.deleteRemainingOrdersSince(missionManager.startTimestamp)
+		missionManager.orderManager.cancelRemainingOrdersSince(missionManager.startTimestamp, missionManager.carName)
 		for _, stop := range missionManager.currentMission.Stops {
 			missionManager.orderManager.postOrder(stop.Name, missionManager.currentMission.Route)
 
