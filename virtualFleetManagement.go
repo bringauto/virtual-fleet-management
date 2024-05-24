@@ -18,6 +18,7 @@ import (
 
 const sleepTime = 10
 
+// TODO move to GitHub, make build.sh, DockerFile
 func main() {
 	hostIp, apiKey, logPath, scenariosPath, loop := parseFlags()
 
@@ -33,7 +34,7 @@ func main() {
 }
 
 func parseFlags() (string, string, string, string, bool) {
-	hostIp := flag.String("host", "http://127.0.0.1:8081", "IPv4 address")
+	hostIp := flag.String("host", "http://127.0.0.1:8081", "Fleet Management HTTP API url")
 	apiKey := flag.String("api-key", "123456", "API key")
 	logPath := flag.String("log-path", "./", "Path for log file")
 	scenariosPath := flag.String("scenario-dir", "./scenarios/virtual_vehicle", "Path of scenarios folder")
