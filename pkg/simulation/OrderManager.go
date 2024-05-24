@@ -21,20 +21,30 @@ func newOrderManager(client *http.Client, routeIds map[string]int32, stopIds map
 	}
 }
 
-func (simulation *OrderManager) SetCarId(carId *int32) {
-	simulation.carId = carId
+func (orderManager *OrderManager) SetCarId(carId *int32) {
+	orderManager.carId = carId
 }
 
-func (simulation *OrderManager) postOrder(stopName string, routeName string) {
-	simulation.client.AddOrder(*simulation.carId, simulation.stopIds[stopName], simulation.routeIds[routeName])
+func (orderManager *OrderManager) postOrder(stopName string, routeName string) {
+	orderManager.client.AddOrder(*orderManager.carId, orderManager.stopIds[stopName], orderManager.routeIds[routeName])
 }
 
-func (simulation *OrderManager) cancelRemainingOrdersSince(since int64, carName string) {
-	orders := simulation.client.GetOrdersForCar(*simulation.carId, since)
+func (orderManager *OrderManager) cancelRemainingOrdersSince(since int64, carName string) {
+	orders := orderManager.client.GetOrdersForCar(*orderManager.carId, since)
 	for _, order := range orders {
 		if order.LastState.Status != openapi.DONE && order.LastState.Status != openapi.CANCELED {
-			log.Printf("[INFO] [%v] cancelling order id: %v", carName, order.Id) // TODO do reverse lookup in map for stopName?
-			simulation.client.CancelOrder(*order.Id)
+			log.Printf("[INFO] [%v] cancelling order id: %v", carName, *order.Id) // TODO do reverse lookup in map for stopName?
+			orderManager.client.CancelOrder(*order.Id)
 		}
 	}
+}
+
+func (orderManager *OrderManager) AreAllCarOrdersDone() bool {
+	orders := orderManager.client.GetOrdersForCar(*orderManager.carId, 0)
+	for _, order := range orders {
+		if order.LastState.Status != openapi.DONE && order.LastState.Status != openapi.CANCELED {
+			return false
+		}
+	}
+	return true
 }
