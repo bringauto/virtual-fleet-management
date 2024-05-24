@@ -38,12 +38,10 @@ func CreateClient(host string, key string) *Client {
 		},
 	)
 	_, err := apiClient.ApiAPI.CheckApiIsAlive(auth).Execute()
-	if err != nil {
+	if err != nil { // TODO should loop for a while?
 		log.Fatal("[ERROR] ", err)
 	}
-
 	// TODO: get userId from management api
-
 	return &Client{
 		apiClient: apiClient,
 		auth:      auth,

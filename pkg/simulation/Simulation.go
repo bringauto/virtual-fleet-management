@@ -2,10 +2,13 @@ package simulation
 
 import (
 	"log"
+	"sync"
 	"time"
 	"virtual-fleet-management/pkg/http"
 	"virtual-fleet-management/pkg/scenario"
 )
+
+const sleepTime = 10
 
 type Simulation struct {
 	loop               bool
@@ -29,26 +32,30 @@ func (simulation *Simulation) SetCarId(carId *int32) {
 	simulation.orderManager.SetCarId(carId)
 }
 
-func (simulation *Simulation) Start() {
+func (simulation *Simulation) Start(wg *sync.WaitGroup) {
 	if simulation.orderManager.carId == nil {
 		log.Fatalf("[ERROR] Car ID is not set for: %v", simulation.simulationScenario.CarId)
 	}
 	log.Printf("[INFO] [%v] Starting simulation", simulation.simulationScenario.CarId)
-	simulation.resetSimulation()
-
-	// TODO sleep until the minimum time of mission
-	time.Sleep(time.Duration(simulation.simulationScenario.GetTotalDelay()) * time.Second)
-	for {
-		// TODO get order states
-	}
-	// TODO sleep until the mission is finished
-	if simulation.loop {
-		log.Printf("[INFO] [%v] Car have finished all of its missions, starting simulation again", simulation.simulationScenario.CarId)
+	finished := false
+	for !finished {
 		simulation.resetSimulation()
-	} else {
-		log.Printf("[INFO] [%v] All missions have been finished", simulation.simulationScenario.CarId) // TODO check order state first
-		// TODO finish simulation
+		// sleep until the minimum delay of mission + sleepTime to avoid race condition
+		time.Sleep(time.Duration(simulation.simulationScenario.GetTotalDelay()+sleepTime) * time.Second)
+		for {
+			if simulation.orderManager.AreAllCarOrdersDone() {
+				break
+			}
+			time.Sleep(sleepTime * time.Second)
+		}
+		if simulation.loop {
+			log.Printf("[INFO] [%v] Car have finished all of its missions, starting simulation again", simulation.simulationScenario.CarId)
+		} else {
+			finished = true
+		}
 	}
+	log.Printf("[INFO] [%v] All missions have been finished", simulation.simulationScenario.CarId)
+	defer wg.Done()
 }
 
 func (simulation *Simulation) resetSimulation() {
