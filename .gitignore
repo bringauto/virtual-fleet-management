@@ -2,7 +2,6 @@
 .idea
 go.sum
 main
-*.txt
 app
 *.zip
 *.log
