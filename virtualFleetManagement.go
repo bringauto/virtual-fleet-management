@@ -82,13 +82,11 @@ func monitorAndStartNewCars(client *http.Client, simulations map[string]*simulat
 					}
 				}
 			}
-
-			// Sleep for a while before the next iteration to avoid busy looping.
 			time.Sleep(sleepTime * time.Second)
 		}
 	}()
 
-	waitGroup.Wait() // Wait for all goroutines to finish
+	waitGroup.Wait() // Wait for all scenarios to finish
 }
 
 func setUpLogger(path string) {
@@ -109,7 +107,7 @@ func setSignalHandler() {
 	go func() {
 		<-ic
 		fmt.Printf("[INFO] signal received, exiting\n")
-		// TODO do we want to cancell orders?
+		// TODO do we want to cancel orders?
 		os.Exit(0)
 	}()
 }
