@@ -2,6 +2,7 @@ package simulation
 
 import (
 	openapi "github.com/bringauto/fleet-management-http-client-go"
+	"log"
 	"virtual-fleet-management/pkg/http"
 )
 
@@ -28,11 +29,11 @@ func (simulation *OrderManager) postOrder(stopName string, routeName string) {
 	simulation.client.AddOrder(*simulation.carId, simulation.stopIds[stopName], simulation.routeIds[routeName])
 }
 
-func (simulation *OrderManager) deleteRemainingOrdersSince(since int64) {
+func (simulation *OrderManager) cancelRemainingOrdersSince(since int64, carName string) {
 	orders := simulation.client.GetOrdersForCar(*simulation.carId, since)
 	for _, order := range orders {
 		if order.LastState.Status != openapi.DONE && order.LastState.Status != openapi.CANCELED {
-			//log.Printf("[INFO] [%v] cancelling order: %v", simulation.simulationScenario.CarId, order.Id) TODO move
+			log.Printf("[INFO] [%v] cancelling order id: %v", carName, order.Id) // TODO do reverse lookup in map for stopName?
 			simulation.client.CancelOrder(*order.Id)
 		}
 	}

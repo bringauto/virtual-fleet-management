@@ -23,7 +23,7 @@ func main() {
 	setUpLogger(logPath)
 	setSignalHandler()
 
-	allScenarios := getAllScenarios(scenariosPath)
+	allScenarios := scenario.GetAllScenariosFromDir(scenariosPath)
 	client := http.CreateClient(hostIp, apiKey)
 
 	simulations := createSimulations(allScenarios, loop, client)
@@ -43,15 +43,6 @@ func parseFlags() (string, string, string, string, bool) {
 	return *hostIp, *apiKey, *logPath, *scenariosPath, *loop
 }
 
-func getAllScenarios(scenariosPath string) (allScenarios []scenario.Scenario) {
-	cars := scenario.GetCarIdList(scenariosPath)
-
-	for _, car := range cars {
-		allScenarios = append(allScenarios, scenario.GetScenario(car, scenariosPath))
-	}
-	return allScenarios
-}
-
 func createSimulations(allScenarios []scenario.Scenario, loop bool, client *http.Client) map[string]*simulation.Simulation {
 	var simulations = make(map[string]*simulation.Simulation)
 	for _, currScenario := range allScenarios {
@@ -65,22 +56,24 @@ func startNewCars(client *http.Client, simulations map[string]*simulation.Simula
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	existingCars := make(map[int32]bool)
+	activeCars := make(map[int32]bool)
 
 	go func() { // Start a new goroutine
 		for {
 			cars := client.GetCars()
 			for _, car := range cars {
-				if _, exists := existingCars[*car.Id]; !exists {
-					// If the car is not in the existingCars map, it's a new car.
-					existingCars[*car.Id] = true
-
-					// Start the simulation for the new car.
-					if carSimulation, ok := simulations[car.Name]; ok {
-						carSimulation.SetCarId(car.Id)
-						go carSimulation.Start() // Start the simulation in a new goroutine
-					} else {
-						log.Printf("[INFO] New car connected: %v, this car doesn't have any available scenario", car.Name)
+				if _, active := activeCars[*car.Id]; !active {
+					// Check if the car is communicating with the server
+					if *car.LastState.Timestamp+int64(2*sleepTime) >= time.Now().UnixMilli() {
+						// If the car is not in the activeCars map, it's a new car.
+						activeCars[*car.Id] = true
+						// Start the simulation for the new car.
+						if carSimulation, ok := simulations[car.Name]; ok {
+							carSimulation.SetCarId(car.Id)
+							go carSimulation.Start() // Start the simulation in a new goroutine
+						} else {
+							log.Printf("[INFO] New car connected: %v, this car doesn't have any available scenario", car.Name)
+						}
 					}
 				}
 			}
