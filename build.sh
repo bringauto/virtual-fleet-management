@@ -24,7 +24,7 @@ mkdir -p "${INSTALL_DIR}/config/"
 
 cp virtual-fleet-management                  "${INSTALL_DIR}/"
 cp README.md                                 "${INSTALL_DIR}/"
-#cp LICENSE                                  "${INSTALL_DIR}/" // TODO: Uncomment this line after adding LICENSE file
+cp LICENSE                                   "${INSTALL_DIR}/"
 cp -r resources/scenarios/virtual_vehicle/   "${INSTALL_DIR}/scenarios/virtual_vehicle/"
 cp resources/config/default.json             "${INSTALL_DIR}/config/config.json"
 
