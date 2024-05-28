@@ -30,7 +30,7 @@ mkdir -p "${INSTALL_DIR_SCENARIOS}"
 cp virtual-fleet-management       "${INSTALL_DIR}/"
 cp README.md                      "${INSTALL_DIR}/"
 #cp LICENSE                        "${INSTALL_DIR}/" // TODO: Uncomment this line after adding LICENSE file
-cp -r scenarios                   "${INSTALL_DIR_SCENARIOS}/"
+cp -r resources/scenarios/        "${INSTALL_DIR_SCENARIOS}/" # TODO: add all resources to installed package
 
 zip -r "virtual-fleet-management_v${VERSION}_${MACHINE}-linux.zip" ${INSTALL_DIR}/
 zip -r "virtual-fleet-management-scenarios_v${VERSION}_${MACHINE}-linux.zip" ${INSTALL_DIR_SCENARIOS}/
