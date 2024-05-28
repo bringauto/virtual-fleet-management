@@ -12,7 +12,7 @@ This project serves as testing base for BA daemon. Virtual fleet implements [ind
 ## Tests
 
 ## Scenarios
-Scenarios are stored in [virtual-fleet scenarios folder](scenarios/) in json format. Files are distributed  into folders depending on topics they will be used on.
+Scenarios are stored in [virtual-fleet scenarios folder](resources/scenarios/) in json format. Files are distributed  into folders depending on topics they will be used on.
 For example scenarios for topic bringauto/kralovopolska/car1 will be stored in virtual-fleet/scenarios/bringauto/kralovopolska/car1/. Each car folder can contain multiple scenario files, but right now one scenario per car is supported, first correct file will be run and other files will be ignored
 
 ### JSON format
@@ -116,9 +116,17 @@ bash build.sh
 ```
 Run the app:
 ```
-./virtual-fleet-management --host=<http://127.0.0.1:8081> --api-key=<api-key> --scenario-dir=<path/to/scenario/dir>  --log-path=</path/> [--loop]
+./virtual-fleet-management -config <config.json>
 ```
 
+### Config values
+
+* **host** - address of the server where the virtual fleet will be running
+* **api-key** - api key for the Fleet Management HTTP API
+* **scenario-dir** - path to the directory with scenarios. `<scenario_dir>/<car_name>/scenario.json`
+  * common approach is to name the scenario directory as company
+* **log-path** - path to the log directory
+* **loop** - optional argument, if set the scenarios will be looped infinitely
 
 ## Build and run docker image
 Build the image using:

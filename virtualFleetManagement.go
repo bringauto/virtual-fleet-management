@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	openapi "github.com/bringauto/fleet-management-http-client-go"
@@ -18,31 +19,84 @@ import (
 
 const sleepTime = 10
 
-// TODO move to GitHub, make build.sh, DockerFile
+// TODO move to GitHub
 func main() {
-	hostIp, apiKey, logPath, scenariosPath, loop := parseFlags()
+	//hostIp, apiKey, logPath, scenariosPath, loop := parseFlags()
+	config := parseFlags()
 
-	setUpLogger(logPath)
+	setUpLogger(config.LogPath)
 	setSignalHandler()
 
-	allScenarios := scenario.GetAllScenariosFromDir(scenariosPath)
-	client := http.CreateClient(hostIp, apiKey)
+	allScenarios := scenario.GetAllScenariosFromDir(config.ScenariosPath)
+	client := http.CreateClient(config.HostIp, config.ApiKey)
 
-	simulations := createSimulations(allScenarios, loop, client)
+	simulations := createSimulations(allScenarios, config.Loop, client)
 
 	monitorAndStartNewCars(client, simulations)
 }
 
-func parseFlags() (string, string, string, string, bool) {
-	hostIp := flag.String("host", "http://127.0.0.1:8081", "Fleet Management HTTP API url")
-	apiKey := flag.String("api-key", "123456", "API key")
-	logPath := flag.String("log-path", "./", "Path for log file")
-	scenariosPath := flag.String("scenario-dir", "./scenarios/virtual_vehicle", "Path of scenarios folder")
-	loop := flag.Bool("loop", false, "Set true if scenarios should be run in loops")
+type Config struct {
+	HostIp        string `json:"host"`
+	ApiKey        string `json:"api-key"`
+	LogPath       string `json:"log-path"`
+	ScenariosPath string `json:"scenario-dir"`
+	Loop          bool   `json:"loop"`
+}
 
+func parseFlags() (config Config) {
+	configFile := flag.String("config", "", "Path to JSON configuration file")
+	help := flag.Bool("help", false, "Show help")
+	apiKey := flag.String("api-key", "", "API key for the fleet management server. Optional, will override config value")
 	flag.Parse()
 
-	return *hostIp, *apiKey, *logPath, *scenariosPath, *loop
+	if *help {
+		print(
+			"Run: ./virtual-fleet-management -config config.json\n",
+			"Options:\n")
+		flag.PrintDefaults()
+		print(
+			"Config values:\n",
+			"\thost: IP address of the Fleet Management HTTP API\n",
+			"\tapi-key: API key for the Fleet Management HTTP API\n",
+			"\tlog-path: Path to the log file\n",
+			"\tscenario-dir: Path to the directory containing the scenario files\n",
+			"\tloop: Whether to loop the scenarios or not\n")
+		os.Exit(0)
+	}
+
+	if *configFile == "" {
+		log.Fatal("No config file provided. Set path with -config option.")
+
+	}
+	file, err := os.Open(*configFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(file)
+
+	bytes, err := io.ReadAll(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = json.Unmarshal(bytes, &config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if apiKey != nil && *apiKey != "" {
+		config.ApiKey = *apiKey
+	}
+
+	if config.HostIp == "" || config.ApiKey == "" || config.LogPath == "" || config.ScenariosPath == "" {
+		log.Fatal("All arguments must be set. Use --help to see the available options.")
+	}
+	return config
 }
 
 func createSimulations(allScenarios []scenario.Scenario, loop bool, client *http.Client) map[string]*simulation.Simulation {
