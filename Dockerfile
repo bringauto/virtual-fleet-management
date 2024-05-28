@@ -1,9 +1,9 @@
 FROM golang:1.21-alpine
-WORKDIR /home/bringauto/virtual-fleet-management
 
-RUN mv ./tmp/virtual-fleet-app ./
+RUN apk add --no-cache zip bash
+WORKDIR /home/bringauto/virtual-fleet-management
+COPY . /home/bringauto/virtual-fleet-management/tmp
+RUN #chmod +x ./tmp/scripts/docker_build.sh
+RUN bash ./tmp/build.sh
+RUN mv ./tmp/virtual-fleet-management ./
 RUN rm -r ./tmp
-#port without ssl
-EXPOSE 1883
-#port with ssl
-EXPOSE 8883
