@@ -2,6 +2,6 @@
   "host": "http://127.0.0.1:8081",
   "api-key": "123456",
   "log-path": "./",
-  "scenario-dir": "./scenarios/virtual_vehicle",
+  "scenario-dir": "./resources/scenarios/virtual_vehicle",
   "loop": false
 }
