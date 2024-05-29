@@ -1,6 +1,6 @@
 FROM golang:1.21-alpine
 
-RUN apk add --no-cache zip bash
+RUN apk add --no-cache bash
 WORKDIR /home/bringauto/virtual-fleet-management
 COPY . /home/bringauto/virtual-fleet-management/tmp
 RUN #chmod +x ./tmp/scripts/docker_build.sh
