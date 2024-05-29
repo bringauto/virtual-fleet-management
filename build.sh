@@ -28,6 +28,6 @@ cp LICENSE                                   "${INSTALL_DIR}/"
 cp -r resources/scenarios/virtual_vehicle/   "${INSTALL_DIR}/scenarios/virtual_vehicle/"
 cp resources/config/default.json             "${INSTALL_DIR}/config/config.json"
 
-zip -r "virtual-fleet-management_v${VERSION}_${MACHINE}-linux.zip" ${INSTALL_DIR}/
+tar -czvf "virtual-fleet-management_v${VERSION}_${MACHINE}-linux.tar.gz" ${INSTALL_DIR}/
 
 rm -fr "${INSTALL_DIR}"
