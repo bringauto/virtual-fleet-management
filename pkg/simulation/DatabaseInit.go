@@ -44,8 +44,17 @@ func findRouteId(route *openapi.Route, existingRoutes []openapi.Route) *int32 {
 		}
 	}
 	return nil
-
 }
+
+// convertPositionToGnss Convert scenario.Position to openapi.GNSSPosition
+func convertPositionToGnss(position scenario.Position) openapi.GNSSPosition {
+	gnss := openapi.NewGNSSPosition()
+	gnss.Latitude = &position.Latitude
+	gnss.Longitude = &position.Longitude
+	gnss.Altitude = &position.Altitude
+	return *gnss
+}
+
 func (simulation *Simulation) initDatabase(scenario2 scenario.Scenario, client *http.Client) (map[string]int32, map[string]int32) {
 	stopIds := make(map[string]int32)
 	routeIds := make(map[string]int32)
@@ -55,11 +64,13 @@ func (simulation *Simulation) initDatabase(scenario2 scenario.Scenario, client *
 		for _, station := range route.Stations {
 			stationId := findStationId(station, existingStations)
 			if stationId == nil {
-				stationId = client.AddStop(station)
+				newStop := openapi.NewStop(station.Name, convertPositionToGnss(station.Position))
+				stationId = client.AddStop(newStop)
+				newStop.Id = stationId
+				existingStations = append(existingStations, *newStop)
 			}
 			routeStopIds = append(routeStopIds, *stationId)
 			stopIds[station.Name] = *stationId
-
 		}
 		newRoute := openapi.NewRoute(route.Name)
 		newRoute.SetStopIds(routeStopIds)

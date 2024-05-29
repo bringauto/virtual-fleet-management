@@ -48,18 +48,37 @@ func NewScenario(scenarioStruct ScenarioStruct, carId string) Scenario {
 		Missions: scenarioStruct.Missions,
 		Routes:   scenarioStruct.Routes,
 	}
-	if !scenario.isValid() {
+	if !scenario.IsValid() {
 		panic(fmt.Sprintf("[ERROR] Scenario for car %v is not valid", carId))
 	}
 	return scenario
 }
 
-func (scenario *Scenario) isValid() bool {
+func (scenario *Scenario) IsValid() bool {
 	for _, mission := range scenario.Missions {
 		if !scenario.areStopsOnRoute(mission) {
 			log.Printf("[ERROR] Scenario %v: Stops in mission %v are not on the route %v\n.", scenario.CarId, mission.Name, mission.Route)
 			return false
 		}
+	}
+	for _, route := range scenario.Routes {
+		if !scenario.areStationsUnique(route.Name) {
+			return false
+		}
+	}
+	return true
+}
+
+func (scenario *Scenario) areStationsUnique(routeName string) bool {
+	stations := scenario.getStations(routeName)
+	stationMap := make(map[string]bool)
+
+	for _, station := range stations {
+		if _, exists := stationMap[station.Name]; exists {
+			log.Printf("[ERROR] Duplicate station found on route %v: %v\n", routeName, station.Name)
+			return false
+		}
+		stationMap[station.Name] = true
 	}
 	return true
 }
