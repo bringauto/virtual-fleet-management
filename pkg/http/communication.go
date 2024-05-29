@@ -37,6 +37,7 @@ func CreateClient(host string, key string) *Client {
 			"APIKeyAuth": {Key: key},
 		},
 	)
+	log.Printf("[INFO] Checking access to API '%v'", host)
 	_, err := apiClient.ApiAPI.CheckApiIsAlive(auth).Execute()
 	if err != nil { // TODO should loop for a while?
 		log.Fatal("[ERROR] ", err)

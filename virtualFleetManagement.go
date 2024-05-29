@@ -19,9 +19,7 @@ import (
 
 const sleepTime = 10
 
-// TODO move to GitHub
 func main() {
-	//hostIp, apiKey, logPath, scenariosPath, loop := parseFlags()
 	config := parseFlags()
 
 	setUpLogger(config.LogPath)
