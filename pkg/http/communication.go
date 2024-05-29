@@ -5,7 +5,6 @@ import (
 	openapi "github.com/bringauto/fleet-management-http-client-go"
 	"log"
 	"net/url"
-	"virtual-fleet-management/pkg/scenario"
 )
 
 type Client struct {
@@ -50,15 +49,6 @@ func CreateClient(host string, key string) *Client {
 	}
 }
 
-// convertPositionToGnss Convert scenario.Position to openapi.GNSSPosition
-func convertPositionToGnss(position scenario.Position) openapi.GNSSPosition {
-	gnss := openapi.NewGNSSPosition()
-	gnss.Latitude = &position.Latitude
-	gnss.Longitude = &position.Longitude
-	gnss.Altitude = &position.Altitude
-	return *gnss
-}
-
 func (c *Client) GetStops() []openapi.Stop {
 	stopData, _, err := c.apiClient.StopAPI.GetStops(c.auth).Execute()
 	if err != nil {
@@ -68,11 +58,10 @@ func (c *Client) GetStops() []openapi.Stop {
 }
 
 // AddStop Add stop to database and return stopId
-func (c *Client) AddStop(stationStruct scenario.StationStruct) (stopId *int32) {
-	newStop := openapi.NewStop(stationStruct.Name, convertPositionToGnss(stationStruct.Position))
-	stopData, _, err := c.apiClient.StopAPI.CreateStop(c.auth).Stop(*newStop).Execute()
+func (c *Client) AddStop(stop *openapi.Stop) (stopId *int32) {
+	stopData, _, err := c.apiClient.StopAPI.CreateStop(c.auth).Stop(*stop).Execute()
 	if err != nil {
-		log.Fatal(`[ERROR] calling 'StopApi.CreateStop' with stop: '`, newStop.Name, `' error: `, err)
+		log.Fatal(`[ERROR] calling 'StopApi.CreateStop' with stop: '`, stop.Name, `' error: `, err)
 	}
 	return stopData.Id
 }
