@@ -117,7 +117,7 @@ func isVehicleCommunicating(car openapi.Car) bool {
 func monitorAndStartNewCars(client *http.Client, simulations map[string]*simulation.Simulation) {
 	var waitGroup sync.WaitGroup
 	waitGroup.Add(len(simulations))
-
+	log.Print("[INFO] Starting monitoring of cars. Simulation will start, once a car starts communicating.")
 	go func() { // Start a new goroutine
 		activeCars := make(map[int32]bool)
 		for {
