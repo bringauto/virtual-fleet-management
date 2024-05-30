@@ -6,9 +6,10 @@ import (
 )
 
 type ScenarioStruct struct {
-	Map      string          `json:"map"`
-	Missions []MissionStruct `json:"missions"`
-	Routes   []RouteStruct   `json:"routes"`
+	Map             string          `json:"map"`
+	StartingStation string          `json:"starting_station"`
+	Missions        []MissionStruct `json:"missions"`
+	Routes          []RouteStruct   `json:"routes"`
 }
 
 type MissionStruct struct {
@@ -37,16 +38,20 @@ type RouteStruct struct {
 }
 
 type Scenario struct {
-	CarId    string
-	Missions []MissionStruct
-	Routes   []RouteStruct
+	CarId           string
+	StartingStation string
+	StartingRoute   string
+	Missions        []MissionStruct
+	Routes          []RouteStruct
 }
 
 func NewScenario(scenarioStruct ScenarioStruct, carId string) Scenario {
 	scenario := Scenario{
-		CarId:    carId,
-		Missions: scenarioStruct.Missions,
-		Routes:   scenarioStruct.Routes,
+		CarId:           carId,
+		StartingStation: scenarioStruct.StartingStation,
+		Missions:        scenarioStruct.Missions,
+		StartingRoute:   getStartingRoute(scenarioStruct.Routes, scenarioStruct.StartingStation),
+		Routes:          scenarioStruct.Routes,
 	}
 	if !scenario.IsValid() {
 		panic(fmt.Sprintf("[ERROR] Scenario for car %v is not valid", carId))
@@ -55,6 +60,10 @@ func NewScenario(scenarioStruct ScenarioStruct, carId string) Scenario {
 }
 
 func (scenario *Scenario) IsValid() bool {
+	if scenario.StartingRoute == "" {
+		log.Printf("[ERROR] Scenario %v: starting_station is not on any route\n.", scenario.CarId)
+		return false
+	}
 	for _, mission := range scenario.Missions {
 		if !scenario.areStopsOnRoute(mission) {
 			log.Printf("[ERROR] Scenario %v: Stops in mission %v are not on the route %v\n.", scenario.CarId, mission.Name, mission.Route)
@@ -67,6 +76,15 @@ func (scenario *Scenario) IsValid() bool {
 		}
 	}
 	return true
+}
+
+func getStartingRoute(routes []RouteStruct, startingStation string) string {
+	for _, route := range routes {
+		if containsStation(route.Stations, startingStation) {
+			return route.Name
+		}
+	}
+	return ""
 }
 
 func (scenario *Scenario) areStationsUnique(routeName string) bool {

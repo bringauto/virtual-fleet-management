@@ -60,5 +60,11 @@ func (simulation *Simulation) Start(wg *sync.WaitGroup) {
 
 func (simulation *Simulation) resetSimulation() {
 	simulation.missionManager.startMissions(simulation.simulationScenario.Missions)
+}
 
+func (simulation *Simulation) getCarToStartingState() {
+	log.Printf("[INFO] [%v] Cancelling all remaining orders", simulation.simulationScenario.CarId)
+	simulation.orderManager.cancelRemainingOrdersSince(0, simulation.simulationScenario.CarId)
+	log.Printf("[INFO] [%v] Ordering car to the starting station", simulation.simulationScenario.CarId)
+	simulation.orderManager.postOrder(simulation.simulationScenario.StartingStation, simulation.simulationScenario.StartingRoute)
 }

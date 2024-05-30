@@ -1,5 +1,6 @@
 {
     "map": "Brno.osm",
+    "starting_station": "Lidická",
     "missions": [
         {
             "delay_seconds": 0,

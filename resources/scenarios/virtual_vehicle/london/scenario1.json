@@ -1,5 +1,6 @@
 {
     "map": "London.osm",
+    "starting_station": "London National Theatre",
     "missions": [
         {
             "delay_seconds": 0,
@@ -83,8 +84,8 @@
                 {
                     "name": "London Waterloo",
                     "position": {
-                        "latitude": 51.50423320901,
-                        "longitude": -0.11283786178,
+                        "latitude": 51.50423,
+                        "longitude": -0.11283,
                         "altitude": 0
                     }
                 },

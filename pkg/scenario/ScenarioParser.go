@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func GetAllScenariosFromDir(scenariosPath string) (allScenarios []Scenario) {
@@ -20,8 +21,7 @@ func GetAllScenariosFromDir(scenariosPath string) (allScenarios []Scenario) {
 func getCarIdList(pathToScenarioFolder string) []string {
 	var cars []string
 	cars, _ = getListsOfDirsAndFiles(pathToScenarioFolder)
-	log.Printf("[INFO] Found cars: %v\n", cars)
-
+	log.Printf("[INFO] Found cars: %v\n", strings.Join(cars, ", "))
 	return cars
 }
 

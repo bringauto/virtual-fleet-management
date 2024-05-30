@@ -6,16 +6,10 @@ import (
 	"virtual-fleet-management/pkg/scenario"
 )
 
-type CancelableTimer struct {
-	timer       *time.Timer
-	cancelTimer chan struct{}
-	durationSec int
-}
-
 type MissionManager struct {
 	currentMission    scenario.MissionStruct
 	remainingMissions []scenario.MissionStruct
-	missionTimer      CancelableTimer
+	missionTimer      *time.Timer
 	startTimestamp    int64
 	carName           string
 	orderManager      *OrderManager
@@ -24,7 +18,6 @@ type MissionManager struct {
 func NewMissionManager(carName string, orderManager *OrderManager) *MissionManager {
 	missionManager := new(MissionManager)
 	missionManager.carName = carName
-	missionManager.missionTimer = CancelableTimer{timer: nil, cancelTimer: make(chan struct{})}
 	missionManager.orderManager = orderManager
 	return missionManager
 }
@@ -46,7 +39,7 @@ func (missionManager *MissionManager) setNextMissionTimer() {
 		missionTimeOffset := int64(missionManager.remainingMissions[0].DelaySeconds)
 		startNextMissionTimestamp := missionTimeOffset + missionManager.startTimestamp
 		calculatedTimerTime := startNextMissionTimestamp - time.Now().Unix()
-		if calculatedTimerTime < 1 {
+		if calculatedTimerTime < 0 {
 			log.Printf("[WARNING] [%v] Calculated time to next mission (%v) seems wrong, defaulting to one minute", missionManager.carName, calculatedTimerTime)
 			calculatedTimerTime = 60
 		}
@@ -56,25 +49,20 @@ func (missionManager *MissionManager) setNextMissionTimer() {
 }
 
 func (missionManager *MissionManager) startMissionTimer(duration int) {
-	if missionManager.missionTimer.timer == nil {
-		missionManager.missionTimer.timer = time.NewTimer(time.Duration(duration) * time.Second)
+	if missionManager.missionTimer == nil {
+		missionManager.missionTimer = time.NewTimer(time.Duration(duration) * time.Second)
 
 	} else {
-		missionManager.missionTimer.timer.Reset(time.Duration(duration) * time.Second)
+		missionManager.missionTimer.Reset(time.Duration(duration) * time.Second)
 	}
 
 	go func() {
-		select {
-		case <-missionManager.missionTimer.timer.C:
-			if len(missionManager.currentMission.Stops) > 0 {
-				log.Printf("[WARNING] [%v] Mission (%v) timeout! Starting new mission (%v)\n", missionManager.carName, missionManager.currentMission.Name, missionManager.remainingMissions[0].Name)
-			} else {
-				log.Printf("[INFO] [%v] Starting next scheduled mission (%v)\n", missionManager.carName, missionManager.remainingMissions[0].Name)
-			}
-			missionManager.popNextMission()
-		case <-missionManager.missionTimer.cancelTimer:
-			missionManager.missionTimer.timer = nil
+		<-missionManager.missionTimer.C
+		if len(missionManager.currentMission.Stops) > 0 {
+			log.Printf("[WARNING] [%v] Mission (%v) timeout!\n", missionManager.carName, missionManager.currentMission.Name)
 		}
+		log.Printf("[INFO] [%v] Starting next scheduled mission (%v)\n", missionManager.carName, missionManager.remainingMissions[0].Name)
+		missionManager.popNextMission()
 	}()
 }
 
@@ -82,7 +70,8 @@ func (missionManager *MissionManager) popNextMission() {
 	if len(missionManager.remainingMissions) > 0 {
 		missionManager.currentMission = missionManager.remainingMissions[0]
 		missionManager.remainingMissions = missionManager.remainingMissions[1:]
-		missionManager.orderManager.cancelRemainingOrdersSince(missionManager.startTimestamp, missionManager.carName)
+		//startInMilli := missionManager.startTimestamp * 1000
+		missionManager.orderManager.cancelRemainingOrdersSince(0, missionManager.carName)
 		for _, stop := range missionManager.currentMission.Stops {
 			missionManager.orderManager.postOrder(stop.Name, missionManager.currentMission.Route)
 

@@ -16,11 +16,19 @@ Scenarios are stored in [virtual-fleet scenarios folder](resources/scenarios/) i
 For example scenarios for topic bringauto/kralovopolska/car1 will be stored in virtual-fleet/scenarios/bringauto/kralovopolska/car1/. Each car folder can contain multiple scenario files, but right now one scenario per car is supported, first correct file will be run and other files will be ignored
 
 ### JSON format
-Json files contain information about map file that is used for missions (name or path to it) and list of missions. Each mission contains delay, name and list of stops. Delay informs the virtual fleet after how long period after establishing first connection of given car will be the mission started. Example:
+Json files contain information about map file that is used for missions (name or path to it), starting station, and list of missions.
+
+Starting station defines in which station the simulation will start. 
+Order with starting_station is sent to the car as first mission. Once this order is done, first mission is started.
+
+Each mission contains delay, name and list of stops. Delay informs the virtual fleet after how long period after establishing first connection of given car will be the mission started.
+
+Example:
 
 ```
 {
     "map": "London.osm",
+    "starting_station": "London National Theatre",
     "missions": [
         {
             "delay_seconds": 0,
@@ -104,7 +112,7 @@ Json files contain information about map file that is used for missions (name or
     ]
 }
 ```
-This scenario will play mission ["London National Theatre", "Cross Station" ] from map London.osm from timestamp 0 to 150 (calculated from first connection with given car)
+This scenario will place order ["London National Theatre"], then play mission ["London National Theatre", "Cross Station" ] from map London.osm from timestamp 0 to 150 (calculated from first connection with given car)
 and after that time interval it will switch to second mission  [ "Oasis Academy", "London Waterloo" ]
 
 
