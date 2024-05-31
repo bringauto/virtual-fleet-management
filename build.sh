@@ -3,7 +3,7 @@
 set -e
 
 SCRIPT_DIR="$(dirname "$0")"
-cd ${SCRIPT_DIR}
+pushd ${SCRIPT_DIR}
 
 VERSION=$(sed -E -n 's/version=([^=]+)/\1/p' < version.txt)
 MACHINE=$(uname -m | sed -E 's/_/-/')
@@ -31,3 +31,4 @@ cp resources/config/default.json             "${INSTALL_DIR}/config/config.json"
 tar -czvf "virtual-fleet-management_v${VERSION}_${MACHINE}-linux.tar.gz" ${INSTALL_DIR}/
 
 rm -fr "${INSTALL_DIR}"
+popd

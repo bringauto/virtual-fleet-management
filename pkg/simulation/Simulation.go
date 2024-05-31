@@ -59,6 +59,7 @@ func (simulation *Simulation) Start(wg *sync.WaitGroup) {
 }
 
 func (simulation *Simulation) resetSimulation() {
+	simulation.getCarToStartingState()
 	simulation.missionManager.startMissions(simulation.simulationScenario.Missions)
 }
 
