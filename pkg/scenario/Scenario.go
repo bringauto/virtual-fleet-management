@@ -60,18 +60,30 @@ func NewScenario(scenarioStruct ScenarioStruct, carId string) Scenario {
 }
 
 func (scenario *Scenario) IsValid() bool {
+	for _, route := range scenario.Routes {
+		if route.Stations == nil {
+			log.Printf("[ERROR] Scenario %v: Route %v has no stations\n.", scenario.CarId, route.Name)
+			return false
+		}
+		if !scenario.areStationsUnique(route.Name) {
+			return false
+		}
+	}
 	if scenario.StartingRoute == "" {
 		log.Printf("[ERROR] Scenario %v: starting_station is not on any route\n.", scenario.CarId)
 		return false
 	}
 	for _, mission := range scenario.Missions {
-		if !scenario.areStopsOnRoute(mission) {
-			log.Printf("[ERROR] Scenario %v: Stops in mission %v are not on the route %v\n.", scenario.CarId, mission.Name, mission.Route)
+		if mission.Route == "" {
+			log.Printf("[ERROR] Scenario %v: Mission %v has no route defined\n.", scenario.CarId, mission.Name)
 			return false
 		}
-	}
-	for _, route := range scenario.Routes {
-		if !scenario.areStationsUnique(route.Name) {
+		if mission.Stops == nil {
+			log.Printf("[ERROR] Scenario %v: Mission %v has no stops\n.", scenario.CarId, mission.Name)
+			return false
+		}
+		if !scenario.areStopsOnRoute(mission) {
+			log.Printf("[ERROR] Scenario %v: Stops in mission %v are not on the route %v\n.", scenario.CarId, mission.Name, mission.Route)
 			return false
 		}
 	}
@@ -106,6 +118,7 @@ func (scenario *Scenario) areStopsOnRoute(mission MissionStruct) bool {
 	stations := scenario.getStations(mission.Route)
 	for _, stop := range mission.Stops {
 		if !containsStation(stations, stop.Name) {
+			log.Printf("[ERROR] Stop %v in mission %v is not on the route %v\n", stop.Name, mission.Name, mission.Route)
 			return false
 		}
 	}
