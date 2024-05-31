@@ -64,12 +64,9 @@ func (missionManager *MissionManager) popNextMission() {
 	if len(missionManager.remainingMissions) > 0 {
 		missionManager.currentMission = missionManager.remainingMissions[0]
 		missionManager.remainingMissions = missionManager.remainingMissions[1:]
-		//startInMilli := missionManager.startTimestamp * 1000
-		missionManager.orderManager.cancelRemainingOrdersSince(0, missionManager.carName)
-		for _, stop := range missionManager.currentMission.Stops {
-			missionManager.orderManager.postOrder(stop.Name, missionManager.currentMission.Route)
+		missionManager.orderManager.cancelRemainingOrders(missionManager.carName)
+		missionManager.orderManager.postMissionOrders(missionManager.currentMission)
 
-		}
 		missionManager.setNextMissionTimer()
 	}
 }

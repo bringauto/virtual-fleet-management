@@ -42,12 +42,8 @@ func (simulation *Simulation) Start(wg *sync.WaitGroup) {
 		simulation.resetSimulation()
 		// sleep until the minimum delay of mission + sleepTime to avoid race condition
 		time.Sleep(time.Duration(simulation.simulationScenario.GetTotalDelay()+sleepTime) * time.Second)
-		for {
-			if simulation.orderManager.AreAllCarOrdersDone() {
-				break
-			}
-			time.Sleep(sleepTime * time.Second)
-		}
+		simulation.waitUntilAllOrdersAreDone()
+
 		if simulation.loop {
 			log.Printf("[INFO] [%v] Car have finished all of its missions, starting simulation again", simulation.simulationScenario.CarId)
 		} else {
@@ -65,7 +61,17 @@ func (simulation *Simulation) resetSimulation() {
 
 func (simulation *Simulation) getCarToStartingState() {
 	log.Printf("[INFO] [%v] Cancelling all remaining orders", simulation.simulationScenario.CarId)
-	simulation.orderManager.cancelRemainingOrdersSince(0, simulation.simulationScenario.CarId)
+	simulation.orderManager.cancelRemainingOrders(simulation.simulationScenario.CarId)
 	log.Printf("[INFO] [%v] Ordering car to the starting station", simulation.simulationScenario.CarId)
 	simulation.orderManager.postOrder(simulation.simulationScenario.StartingStation, simulation.simulationScenario.StartingRoute)
+	simulation.waitUntilAllOrdersAreDone()
+}
+
+func (simulation *Simulation) waitUntilAllOrdersAreDone() {
+	for {
+		if simulation.orderManager.AreAllCarOrdersDone() {
+			break
+		}
+		time.Sleep(sleepTime * time.Second)
+	}
 }

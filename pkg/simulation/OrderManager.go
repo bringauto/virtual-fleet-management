@@ -4,6 +4,7 @@ import (
 	openapi "github.com/bringauto/fleet-management-http-client-go"
 	"log"
 	"virtual-fleet-management/pkg/http"
+	"virtual-fleet-management/pkg/scenario"
 )
 
 type OrderManager struct {
@@ -25,26 +26,40 @@ func (orderManager *OrderManager) SetCarId(carId *int32) {
 	orderManager.carId = carId
 }
 
-func (orderManager *OrderManager) postOrder(stopName string, routeName string) {
-	orderManager.client.AddOrder(*orderManager.carId, orderManager.stopIds[stopName], orderManager.routeIds[routeName])
+func (orderManager *OrderManager) postMissionOrders(mission scenario.MissionStruct) {
+	orderStops := make([]int32, len(mission.Stops))
+	for i, stop := range mission.Stops {
+		orderStops[i] = orderManager.stopIds[stop.Name]
+	}
+	orderManager.client.AddOrders(*orderManager.carId, orderStops, orderManager.routeIds[mission.Route])
 }
 
-func (orderManager *OrderManager) cancelRemainingOrdersSince(since int64, carName string) {
-	orders := orderManager.client.GetOrdersForCar(*orderManager.carId, since)
+func (orderManager *OrderManager) postOrder(stopName string, routeName string) {
+	orderManager.client.AddOrders(*orderManager.carId, []int32{orderManager.stopIds[stopName]}, orderManager.routeIds[routeName])
+}
+
+func (orderManager *OrderManager) cancelRemainingOrders(carName string) {
+	orders := orderManager.client.GetOrdersForCar(*orderManager.carId)
+	var ordersToCancel []int32
 	for _, order := range orders {
 		if order.LastState.Status != openapi.DONE && order.LastState.Status != openapi.CANCELED {
-			log.Printf("[INFO] [%v] cancelling order id: %v", carName, *order.Id) // TODO do reverse lookup in map for stopName?
-			orderManager.client.CancelOrder(*order.Id)
+			ordersToCancel = append(ordersToCancel, *order.Id)
 		}
 	}
+	log.Printf("[INFO] [%v] cancelling orders id: %v", carName, ordersToCancel) // TODO do reverse lookup in map for stopName?
+	orderManager.client.CancelOrders(ordersToCancel)
 }
 
 func (orderManager *OrderManager) AreAllCarOrdersDone() bool {
-	orders := orderManager.client.GetOrdersForCar(*orderManager.carId, 0)
+	orders := orderManager.client.GetOrdersForCar(*orderManager.carId)
 	for _, order := range orders {
-		if order.LastState.Status != openapi.DONE && order.LastState.Status != openapi.CANCELED {
+		if !isOrderDone(order) {
 			return false
 		}
 	}
 	return true
+}
+
+func isOrderDone(order openapi.Order) bool {
+	return order.LastState.Status == openapi.DONE || order.LastState.Status == openapi.CANCELED
 }
