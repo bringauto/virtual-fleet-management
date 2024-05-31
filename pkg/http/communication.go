@@ -10,7 +10,6 @@ import (
 type Client struct {
 	apiClient *openapi.APIClient
 	auth      context.Context
-	userId    int32
 }
 
 // createConfiguration Create configuration for client
@@ -41,11 +40,9 @@ func CreateClient(host string, key string) *Client {
 	if err != nil { // TODO should loop for a while?
 		log.Fatal("[ERROR] ", err)
 	}
-	// TODO: get userId from management api
 	return &Client{
 		apiClient: apiClient,
 		auth:      auth,
-		userId:    1, // TODO not implemented in management api yet
 	}
 }
 
@@ -59,11 +56,12 @@ func (c *Client) GetStops() []openapi.Stop {
 
 // AddStop Add stop to database and return stopId
 func (c *Client) AddStop(stop *openapi.Stop) (stopId *int32) {
-	stopData, _, err := c.apiClient.StopAPI.CreateStop(c.auth).Stop(*stop).Execute()
+	stopList := []openapi.Stop{*stop}
+	stopData, _, err := c.apiClient.StopAPI.CreateStops(c.auth).Stop(stopList).Execute()
 	if err != nil {
 		log.Fatal(`[ERROR] calling 'StopApi.CreateStop' with stop: '`, stop.Name, `' error: `, err)
 	}
-	return stopData.Id
+	return stopData[0].Id
 }
 
 func (c *Client) GetRoutes() []openapi.Route {
@@ -75,11 +73,12 @@ func (c *Client) GetRoutes() []openapi.Route {
 }
 
 func (c *Client) AddRoute(route *openapi.Route) (routeId *int32) {
-	routeData, _, err := c.apiClient.RouteAPI.CreateRoute(c.auth).Route(*route).Execute()
+	routeList := []openapi.Route{*route}
+	routeData, _, err := c.apiClient.RouteAPI.CreateRoutes(c.auth).Route(routeList).Execute()
 	if err != nil {
 		log.Fatal(`[ERROR] calling 'RouteAPI.CreateRoute':`, err)
 	}
-	return routeData.Id
+	return routeData[0].Id
 }
 
 func (c *Client) GetCars() []openapi.Car {
@@ -90,16 +89,19 @@ func (c *Client) GetCars() []openapi.Car {
 	return carData
 }
 
-func (c *Client) AddOrder(carId int32, stopId int32, routeId int32) {
-	order := openapi.NewOrder(c.userId, carId, stopId, routeId)
-	_, _, err := c.apiClient.OrderAPI.CreateOrder(c.auth).Order(*order).Execute()
+func (c *Client) AddOrders(carId int32, stopIds []int32, routeId int32) {
+	allOrders := make([]openapi.Order, len(stopIds))
+	for i, stopId := range stopIds {
+		allOrders[i] = *openapi.NewOrder(carId, stopId, routeId)
+	}
+	_, _, err := c.apiClient.OrderAPI.CreateOrders(c.auth).Order(allOrders).Execute()
 	if err != nil {
 		log.Fatal(`[ERROR] calling 'OrderAPI.CreateOrder': `, err)
 	}
 }
 
-func (c *Client) GetOrdersForCar(carId int32, since int64) []openapi.Order {
-	orders, _, err := c.apiClient.OrderAPI.GetCarOrders(c.auth, carId).Since(since).Execute()
+func (c *Client) GetOrdersForCar(carId int32) []openapi.Order {
+	orders, _, err := c.apiClient.OrderAPI.GetCarOrders(c.auth, carId).Execute()
 	if err != nil {
 		log.Fatal(`[ERROR] calling 'OrderAPI.GetCarOrders': `, err)
 
@@ -107,9 +109,12 @@ func (c *Client) GetOrdersForCar(carId int32, since int64) []openapi.Order {
 	return orders
 }
 
-func (c *Client) CancelOrder(orderId int32) {
-	orderStatus := *openapi.NewOrderState(openapi.CANCELED, orderId)
-	s, r, err := c.apiClient.OrderStateAPI.CreateOrderState(c.auth).OrderState(orderStatus).Execute()
+func (c *Client) CancelOrders(orderIds []int32) {
+	allOrderStatuses := make([]openapi.OrderState, len(orderIds))
+	for i, orderId := range orderIds {
+		allOrderStatuses[i] = *openapi.NewOrderState(openapi.CANCELED, orderId)
+	}
+	s, r, err := c.apiClient.OrderStateAPI.CreateOrderStates(c.auth).OrderState(allOrderStatuses).Execute()
 	if err != nil {
 		log.Fatal(`[ERROR] cancelling order with 'OrderStateAPI.CreateOrderState': `, err, r, s)
 	}
