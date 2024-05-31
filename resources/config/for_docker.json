@@ -1,7 +1,7 @@
 {
   "host": "http://localhost:8081",
   "api-key": "StaticAccessKeyToBeUsedByDevelopersOnEtna",
-  "log-path": "/home/bringauto/virtual-fleet-management/logs",
+  "log-path": "/home/bringauto/virtual-fleet-management/log",
   "scenario-dir": "/home/bringauto/virtual-fleet-management/scenarios/virtual_vehicle",
   "loop": true
 }
