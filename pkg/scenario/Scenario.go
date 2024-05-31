@@ -74,6 +74,10 @@ func (scenario *Scenario) IsValid() bool {
 		return false
 	}
 	for _, mission := range scenario.Missions {
+		if mission.DelaySeconds < 0 {
+			log.Printf("[ERROR] Scenario %v: Mission %v has negative delay\n.", scenario.CarId, mission.Name)
+			return false
+		}
 		if mission.Route == "" {
 			log.Printf("[ERROR] Scenario %v: Mission %v has no route defined\n.", scenario.CarId, mission.Name)
 			return false

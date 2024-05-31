@@ -36,19 +36,13 @@ func (missionManager *MissionManager) startMissions(missions []scenario.MissionS
 
 func (missionManager *MissionManager) setNextMissionTimer() {
 	if len(missionManager.remainingMissions) > 0 {
-		missionTimeOffset := int64(missionManager.remainingMissions[0].DelaySeconds)
-		startNextMissionTimestamp := missionTimeOffset + missionManager.startTimestamp
-		calculatedTimerTime := startNextMissionTimestamp - time.Now().Unix()
-		if calculatedTimerTime < 0 {
-			log.Printf("[WARNING] [%v] Calculated time to next mission (%v) seems wrong, defaulting to one minute", missionManager.carName, calculatedTimerTime)
-			calculatedTimerTime = 60
-		}
-		log.Printf("[INFO] [%v] Next mission (%v) timestamp: %v, mission will start in %vs", missionManager.carName, missionManager.remainingMissions[0].Name, startNextMissionTimestamp, calculatedTimerTime)
-		missionManager.startMissionTimer(int(calculatedTimerTime))
+		missionTimeOffset := missionManager.remainingMissions[0].DelaySeconds
+		log.Printf("[INFO] [%v] Next mission (%v) will start in %vs", missionManager.carName, missionManager.remainingMissions[0].Name, missionTimeOffset)
+		missionManager.startMissionTimer(missionTimeOffset)
 	}
 }
 
-func (missionManager *MissionManager) startMissionTimer(duration int) {
+func (missionManager *MissionManager) startMissionTimer(duration int32) {
 	if missionManager.missionTimer == nil {
 		missionManager.missionTimer = time.NewTimer(time.Duration(duration) * time.Second)
 
