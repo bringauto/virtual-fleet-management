@@ -52,9 +52,6 @@ func (missionManager *MissionManager) startMissionTimer(duration int32) {
 
 	go func() {
 		<-missionManager.missionTimer.C
-		if len(missionManager.currentMission.Stops) > 0 {
-			log.Printf("[WARNING] [%v] Mission (%v) timeout!\n", missionManager.carName, missionManager.currentMission.Name)
-		}
 		log.Printf("[INFO] [%v] Starting next scheduled mission (%v)\n", missionManager.carName, missionManager.remainingMissions[0].Name)
 		missionManager.popNextMission()
 	}()

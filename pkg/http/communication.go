@@ -4,6 +4,7 @@ import (
 	"context"
 	openapi "github.com/bringauto/fleet-management-http-client-go"
 	"log"
+	"net/http"
 	"net/url"
 )
 
@@ -118,7 +119,7 @@ func (c *Client) CancelOrders(orderIds []int32) {
 		allOrderStates[i] = *openapi.NewOrderState(openapi.CANCELED, orderId)
 	}
 	_, r, err := c.apiClient.OrderStateAPI.CreateOrderStates(c.auth).OrderState(allOrderStates).Execute()
-	if err != nil {
-		log.Fatal(`[ERROR] cancelling order with 'OrderStateAPI.CreateOrderState': `, r.Status, err)
+	if err != nil && r.StatusCode != http.StatusOK { // openapi puts error o parsing response. The response is not needed, so it is ignored
+		log.Fatal(`[ERROR] cancelling order with 'OrderStateAPI.CreateOrderStates': `, r.Status, err)
 	}
 }

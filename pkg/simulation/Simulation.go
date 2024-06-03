@@ -62,7 +62,7 @@ func (simulation *Simulation) resetSimulation() {
 func (simulation *Simulation) getCarToStartingState() {
 	log.Printf("[INFO] [%v] Cancelling all remaining orders", simulation.simulationScenario.CarId)
 	simulation.orderManager.cancelRemainingOrders(simulation.simulationScenario.CarId)
-	log.Printf("[INFO] [%v] Ordering car to the starting station", simulation.simulationScenario.CarId)
+	log.Printf("[INFO] [%v] Ordering car to the starting station: %v", simulation.simulationScenario.CarId, simulation.simulationScenario.StartingStation)
 	simulation.orderManager.postOrder(simulation.simulationScenario.StartingStation, simulation.simulationScenario.StartingRoute)
 	simulation.waitUntilAllOrdersAreDone()
 }
