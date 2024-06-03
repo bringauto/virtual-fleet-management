@@ -37,7 +37,7 @@ func CreateClient(host string, key string) *Client {
 	)
 	log.Printf("[INFO] Checking access to API '%v'", host)
 	_, err := apiClient.ApiAPI.CheckApiIsAlive(auth).Execute()
-	if err != nil { // TODO should loop for a while?
+	if err != nil {
 		log.Fatal("[ERROR] ", err)
 	}
 	return &Client{
@@ -110,12 +110,15 @@ func (c *Client) GetOrdersForCar(carId int32) []openapi.Order {
 }
 
 func (c *Client) CancelOrders(orderIds []int32) {
-	allOrderStatuses := make([]openapi.OrderState, len(orderIds))
-	for i, orderId := range orderIds {
-		allOrderStatuses[i] = *openapi.NewOrderState(openapi.CANCELED, orderId)
+	if len(orderIds) <= 0 {
+		return
 	}
-	s, r, err := c.apiClient.OrderStateAPI.CreateOrderStates(c.auth).OrderState(allOrderStatuses).Execute()
+	allOrderStates := make([]openapi.OrderState, len(orderIds))
+	for i, orderId := range orderIds {
+		allOrderStates[i] = *openapi.NewOrderState(openapi.CANCELED, orderId)
+	}
+	_, r, err := c.apiClient.OrderStateAPI.CreateOrderStates(c.auth).OrderState(allOrderStates).Execute()
 	if err != nil {
-		log.Fatal(`[ERROR] cancelling order with 'OrderStateAPI.CreateOrderState': `, err, r, s)
+		log.Fatal(`[ERROR] cancelling order with 'OrderStateAPI.CreateOrderState': `, r.Status, err)
 	}
 }

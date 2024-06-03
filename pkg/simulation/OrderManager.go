@@ -46,8 +46,10 @@ func (orderManager *OrderManager) cancelRemainingOrders(carName string) {
 			ordersToCancel = append(ordersToCancel, *order.Id)
 		}
 	}
-	log.Printf("[INFO] [%v] cancelling orders id: %v", carName, ordersToCancel) // TODO do reverse lookup in map for stopName?
-	orderManager.client.CancelOrders(ordersToCancel)
+	if len(ordersToCancel) > 0 {
+		log.Printf("[INFO] [%v] cancelling orders id: %v", carName, ordersToCancel) // TODO do reverse lookup in map for stopName?
+		orderManager.client.CancelOrders(ordersToCancel)
+	}
 }
 
 func (orderManager *OrderManager) AreAllCarOrdersDone() bool {
