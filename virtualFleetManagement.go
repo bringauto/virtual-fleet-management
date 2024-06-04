@@ -160,7 +160,6 @@ func setSignalHandler() {
 	go func() {
 		<-ic
 		fmt.Printf("[INFO] signal received, exiting\n")
-		// TODO do we want to cancel orders?
 		os.Exit(0)
 	}()
 }
