@@ -45,6 +45,7 @@ func parseFlags() (config Config) {
 	configFile := flag.String("config", "", "Path to JSON configuration file")
 	help := flag.Bool("help", false, "Show help")
 	apiKey := flag.String("api-key", "", "API key for the fleet management server. Optional, will override config value")
+	scenarioDir := flag.String("scenario-dir", "", "Path to scenario directories. Optional, will override config value")
 	flag.Parse()
 
 	if *help {
@@ -81,7 +82,6 @@ func parseFlags() (config Config) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	err = json.Unmarshal(bytes, &config)
 	if err != nil {
 		log.Fatal(err)
@@ -89,6 +89,9 @@ func parseFlags() (config Config) {
 
 	if apiKey != nil && *apiKey != "" {
 		config.ApiKey = *apiKey
+	}
+	if scenarioDir != nil && *scenarioDir != "" {
+		config.ScenariosPath = *scenarioDir
 	}
 
 	if config.HostIp == "" || config.ApiKey == "" || config.LogPath == "" || config.ScenariosPath == "" {
