@@ -16,7 +16,7 @@ Scenarios are stored in [virtual-fleet scenarios folder](resources/scenarios/) i
 For example scenarios for topic bringauto/kralovopolska/car1 will be stored in virtual-fleet/scenarios/bringauto/kralovopolska/car1/. Each car folder can contain multiple scenario files, but right now one scenario per car is supported, first correct file will be run and other files will be ignored
 
 ### JSON format
-Json files contain information about map file that is used for missions (name or path to it), starting station, and list of missions.
+JSON files contain the information about the map file that is used for missions (name or path to it), starting station and list of missions.
 
 Starting station defines in which station the simulation will start. 
 Order with starting_station is sent to the car as an initial mission. Once this initial mission is completed, first mission is started.
