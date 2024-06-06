@@ -19,7 +19,7 @@ For example scenarios for topic bringauto/kralovopolska/car1 will be stored in v
 Json files contain information about map file that is used for missions (name or path to it), starting station, and list of missions.
 
 Starting station defines in which station the simulation will start. 
-Order with starting_station is sent to the car as first mission. Once this order is done, first mission is started.
+Order with starting_station is sent to the car as an initial mission. Once this initial mission is completed, first mission is started.
 
 Each mission contains delay, name and list of stops. Delay informs the virtual fleet after how long period after establishing first connection of given car will be the mission started.
 
