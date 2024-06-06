@@ -21,6 +21,9 @@ func GetAllScenariosFromDir(scenariosPath string) (allScenarios []Scenario) {
 func getCarIdList(pathToScenarioFolder string) []string {
 	var cars []string
 	cars, _ = getListsOfDirsAndFiles(pathToScenarioFolder)
+	if len(cars) == 0 {
+		panic(fmt.Sprintf("No subdirectories for cars found in %v", pathToScenarioFolder))
+	}
 	log.Printf("[INFO] Found cars: %v\n", strings.Join(cars, ", "))
 	return cars
 }
