@@ -6,7 +6,10 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 )
+
+const sleepTime = 5
 
 type Client struct {
 	apiClient *openapi.APIClient
@@ -36,15 +39,36 @@ func CreateClient(host string, key string) *Client {
 			"APIKeyAuth": {Key: key},
 		},
 	)
-	log.Printf("[INFO] Checking access to API '%v'", host)
-	_, err := apiClient.ApiAPI.CheckApiIsAlive(auth).Execute()
-	if err != nil {
-		log.Fatal("[ERROR] ", err)
-	}
-	return &Client{
+	client := &Client{
 		apiClient: apiClient,
 		auth:      auth,
 	}
+	log.Printf("[INFO] Checking access to API '%v'", host)
+	if !isApiAliveCheck(client) {
+		log.Fatal("[ERROR] Access to API failed. Check if API is running and host address is correct.")
+	}
+	return client
+}
+
+func isApiAliveCheck(client *Client) bool {
+	for i := 1; i <= 5; i++ {
+		response, err := client.apiClient.ApiAPI.CheckApiIsAlive(client.auth).Execute()
+		if err != nil {
+			if response != nil {
+				if response.StatusCode == http.StatusUnauthorized {
+					log.Fatal("[ERROR] Not authorized to access API. Check API key. Error: ", err)
+				} else {
+					log.Printf("[WARNING] Access to API failed with code: %v. Retrying... %v", response.Status, err)
+				}
+			} else {
+				log.Printf("[WARNING] Access to API failed. Retrying... %v", err)
+			}
+		} else {
+			return true
+		}
+		time.Sleep(time.Second * time.Duration(sleepTime*i))
+	}
+	return false
 }
 
 func (c *Client) GetStops() []openapi.Stop {
@@ -119,7 +143,7 @@ func (c *Client) CancelOrders(orderIds []int32) {
 		allOrderStates[i] = *openapi.NewOrderState(openapi.CANCELED, orderId)
 	}
 	_, r, err := c.apiClient.OrderStateAPI.CreateOrderStates(c.auth).OrderState(allOrderStates).Execute()
-	if err != nil && r.StatusCode != http.StatusOK { // openapi puts error o parsing response. The response is not needed, so it is ignored
+	if err != nil && r != nil && r.StatusCode != http.StatusOK { // openapi puts error o parsing response. The response is not needed, so it is ignored
 		log.Fatal(`[ERROR] cancelling order with 'OrderStateAPI.CreateOrderStates': `, r.Status, err)
 	}
 }
