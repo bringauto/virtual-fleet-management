@@ -153,7 +153,7 @@ func setUpLogger(path string) {
 
 	multiWriter := io.MultiWriter(os.Stdout, file)
 	log.SetOutput(multiWriter)
-	log.SetFlags(log.Lmicroseconds)
+	log.SetFlags(log.Ldate | log.Lmicroseconds)
 
 }
 
