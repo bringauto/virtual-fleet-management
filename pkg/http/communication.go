@@ -10,6 +10,7 @@ import (
 )
 
 const sleepTime = 5
+const maxRetries = 5
 
 type Client struct {
 	apiClient *openapi.APIClient
@@ -51,7 +52,7 @@ func CreateClient(host string, key string) *Client {
 }
 
 func isApiAliveCheck(client *Client) bool {
-	for i := 1; i <= 5; i++ {
+	for i := 1; i <= maxRetries; i++ {
 		response, err := client.apiClient.ApiAPI.CheckApiIsAlive(client.auth).Execute()
 		if err != nil {
 			if response != nil {
