@@ -146,7 +146,7 @@ func monitorAndStartNewCars(client *http.Client, simulations map[string]*simulat
 }
 
 func setUpLogger(path string) {
-	file, err := os.OpenFile(path+"/virtual-fleet-managementre.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(path+"/virtual-fleet-management.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatal(err)
 	}
