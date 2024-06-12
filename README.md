@@ -4,6 +4,26 @@ This project serves as testing base for BA daemon. Virtual fleet
 implements [industrial portal protocol](https://docs.google.com/document/d/1sjIE4_c9NrQCpUvlgOwejVMWf6U-QSh_9qobpMqOIRU/edit)
 using MQTT and it replays mission scenarios to connected cars, also logging states of car.
 
+## Behavior
+
+The application reads all scenarios from the directory specified in the configuration.
+Each scenario is a JSON file that describes a sequence of missions for a car.
+The application creates a simulation for each scenario.
+
+The application creates an HTTP client. It checks if the fleet management HTTP API is available. 
+If it's not, it tries again after some time. The sleep time and number of retries are constants in the code. The sleep time is increasing with each retry.
+
+Then it creates routes and stops from the scenario files. If they already exist and are the same, this step is skipped.
+If they exist with different data (e.g. different coordinates), the application logs an error and stops.
+
+The application then starts monitoring the cars. 
+It periodically retrieves the list of cars from the fleet management HTTP API and checks if each car is communicating.
+If a car is communicating, there is available scenario for it and it's not already active, the application starts the simulation for that car in a new goroutine.
+
+Each simulation runs the missions in its scenario in sequence.
+If the loop configuration value is true, the simulation loops the missions indefinitely.
+Otherwise, it runs the missions once and then stops once they are all done.
+
 ## Requirements
 
 - [golang](https://golang.org/)
@@ -196,3 +216,4 @@ and find image id of your docker container. Run the image using:
 ```
 docker run -ti --rm virtual-fleet /virtual-fleet/virtual-fleet-app --broker-ip=<MQTT broker ipv4> --broker-port=<MQTT broker port> scenario-dir=<path to scenario dir>
 ```
+
