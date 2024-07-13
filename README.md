@@ -1,8 +1,6 @@
-# Virtual Fleet
+# Virtual Fleet Management
 
-This project serves as testing base for BA daemon. Virtual fleet
-implements [industrial portal protocol](https://docs.google.com/document/d/1sjIE4_c9NrQCpUvlgOwejVMWf6U-QSh_9qobpMqOIRU/edit)
-using MQTT and it replays mission scenarios to connected cars, also logging states of car.
+This project simulates creating orders for cars. This can be used for integration testing of the Fleet Protocol stack.
 
 ## Behavior
 
@@ -10,18 +8,21 @@ The application reads all scenarios from the directory specified in the configur
 Each scenario is a JSON file that describes a sequence of missions for a car.
 The application creates a simulation for each scenario.
 
-The application creates an HTTP client. It checks if the fleet management HTTP API is available. 
-If it's not, it tries again after some time. The sleep time and number of retries are constants in the code. The sleep time is increasing with each retry.
+The application creates an HTTP client. It checks if the fleet management HTTP API is available.
+If it's not, it tries again after some time. The sleep time and number of retries are constants in the code. The sleep
+time is increasing with each retry.
 
 Then it creates routes and stops from the scenario files. If they already exist and are the same, this step is skipped.
 If they exist with different data (e.g. different coordinates), the application logs an error and stops.
 
-The application then starts monitoring the cars. 
+The application then starts to monitor the cars.
 It periodically retrieves the list of cars from the fleet management HTTP API and checks if each car is communicating.
-If a car is communicating, there is available scenario for it and it's not already active, the application starts the simulation for that car in a new goroutine.
+If a car is communicating and there is an available scenario that is not active, the application starts a simulation for
+that car in a new goroutine.
 
-Each simulation runs the missions in its scenario in sequence.
-If the loop configuration value is true, the simulation loops the missions indefinitely.
+Each simulation first orders the car to the starting station of the scenario, so the simulations are deterministic.
+Then, it runs the missions in its scenario in sequence.
+If the loop configuration value is set to `true` the simulation repeats the missions infinitely.
 Otherwise, it runs the missions once and then stops once they are all done.
 
 ## Requirements
@@ -38,16 +39,17 @@ Otherwise, it runs the missions once and then stops once they are all done.
 
 ## Scenarios
 
-Files are distributed into folders depending the company and car name they will be used for.
+Files are distributed into folders depending on the company and car name they will be used for.
 
 For example scenario for company `BringAuto` with car name `CAR1` will be stored in `/bringauto/car1/scenario.json`.
-Each car folder can contain multiple scenario files, but right now one scenario per car is supported, first correct file
-will be run and other files will be ignored
+Each car folder can contain multiple scenario files, but right now one scenario per car is supported, the first correct
+file
+will be run and the other files will be ignored
 
 All scenarios from the company directory will be played in parallel. The application gets the company folder from a
 config.
 
-Example scenarios are stored in [virtual-fleet scenarios folder](resources/scenarios/) in json format.
+Example scenarios are stored in [virtual-fleet scenarios folder](resources/scenarios/) in JSON format.
 
 ### Directory structure
 
@@ -70,23 +72,23 @@ scenarios/
 JSON files contain the information about the map file that is used for missions (name or path to it), starting station
 and list of missions.
 
-Starting station defines in which station the simulation will start.
-Order with starting_station is sent to the car as an initial mission. Once this initial mission is completed, first
+The starting station defines in which station the simulation will start.
+Order with starting_station is sent to the car as an initial mission. Once this initial mission is completed, the first
 mission is started.
 
 Each mission contains a delay, the mission's name, and a list of stops.
-Delay sets the time, after which the mission is started. This time is counted since the previous mission is started.
-Example:
+Delay sets the time, after which the mission is started. This time is counted since the previous mission started.
+Example with comments:
 
 ```
 {
-    "map": "London.osm",
-    "starting_station": "London National Theatre",
-    "missions": [
+    "map": "London.osm",  -- name of the map of the vehicle, has no effect on the simulation, only informative
+    "starting_station": "London National Theatre",  -- first order for the car, missions are started when the car is in this station
+    "missions": [         -- mission list
         {
-            "delay_seconds": 0,
+            "delay_seconds": 0,   -- delay after the previous mission is started
             "name": "mission1",
-            "stops": [
+            "stops": [    -- stop list
                 {
                     "name": "London National Theatre"
                 },
@@ -94,10 +96,10 @@ Example:
                     "name": "Cross Station"
                 }
             ],
-            "route": "Short"
+            "route": "Short"  -- route containing the stops
         },
         {
-            "delay_seconds": 150,
+            "delay_seconds": 150, -- delay after the previous mission is started. This mission will start 150 seconds after 'mission1'
             "name": "mission2",
             "stops": [
                 {
@@ -167,10 +169,10 @@ Example:
 
 This scenario will create the order ["London National Theatre"], then play the
 mission ["London National Theatre", "Cross Station" ] from map London.osm from timestamp 0 to 150 (calculated from
-reaching the starting station of given scenario)
-and after that time interval it will switch to second mission  [ "Oasis Academy", "London Waterloo" ]
+reaching the starting station of the given scenario)
+and after that time interval, it will switch to the second mission  [ "Oasis Academy", "London Waterloo" ]
 
-## Build and run project locally
+## Build and run the project locally
 
 Run the build script from the project folder:
 
@@ -202,18 +204,11 @@ Run the app:
 Build the image using:
 
 ```
-docker build --tag virtual-fleet .
+docker build --tag bringauto/virtual-fleet-management .
 ```
 
-You can list docker images using:
+Run the image using:
 
 ```
-docker images
+docker run -ti --rm -v <local/path/to/config>:<config_path> bringauto/virtual-fleet-management -config=<config_path>
 ```
-
-and find image id of your docker container. Run the image using:
-
-```
-docker run -ti --rm virtual-fleet /virtual-fleet/virtual-fleet-app --broker-ip=<MQTT broker ipv4> --broker-port=<MQTT broker port> scenario-dir=<path to scenario dir>
-```
-
