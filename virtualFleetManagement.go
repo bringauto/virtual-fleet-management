@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	openapi "github.com/bringauto/fleet-management-http-client-go"
 	"io"
 	"log"
 	"os"
@@ -15,6 +14,8 @@ import (
 	"virtual-fleet-management/pkg/http"
 	"virtual-fleet-management/pkg/scenario"
 	"virtual-fleet-management/pkg/simulation"
+
+	openapi "github.com/bringauto/fleet-management-http-client-go"
 )
 
 const sleepTime = 10
@@ -26,7 +27,7 @@ func main() {
 	setSignalHandler()
 
 	allScenarios := scenario.GetAllScenariosFromDir(config.ScenariosPath)
-	client := http.CreateClient(config.HostIp, config.ApiKey)
+	client := http.CreateClient(config.HostIp, config.ApiKey, config.Company)
 
 	simulations := createSimulations(allScenarios, config.Loop, client)
 
@@ -36,6 +37,7 @@ func main() {
 type Config struct {
 	HostIp        string `json:"host"`
 	ApiKey        string `json:"api-key"`
+	Company       string `json:"company"`
 	LogPath       string `json:"log-path"`
 	ScenariosPath string `json:"scenario-dir"`
 	Loop          bool   `json:"loop"`
@@ -57,6 +59,7 @@ func parseFlags() (config Config) {
 			"Config values:\n",
 			"\thost: IP address of the Fleet Management HTTP API\n",
 			"\tapi-key: API key for the Fleet Management HTTP API\n",
+			"\tcompany: Company name that will be used as a tenant\n",
 			"\tlog-path: Path to the log file\n",
 			"\tscenario-dir: Path to the directory containing the scenario files\n",
 			"\tloop: Whether to loop the scenarios or not\n")
@@ -94,7 +97,7 @@ func parseFlags() (config Config) {
 		config.ScenariosPath = *scenarioDir
 	}
 
-	if config.HostIp == "" || config.ApiKey == "" || config.LogPath == "" || config.ScenariosPath == "" {
+	if config.HostIp == "" || config.ApiKey == "" || config.Company == "" || config.LogPath == "" || config.ScenariosPath == "" {
 		log.Fatal("All arguments must be set. Use --help to see the available options.")
 	}
 	return config

@@ -1,6 +1,7 @@
 {
   "host": "http://127.0.0.1:8081",
   "api-key": "ManagementStaticAccessKey",
+  "company": "bringauto",
   "log-path": "./",
   "scenario-dir": "./resources/scenarios/virtual_vehicle",
   "loop": false

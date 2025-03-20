@@ -1,10 +1,11 @@
 package simulation
 
 import (
-	openapi "github.com/bringauto/fleet-management-http-client-go"
 	"log"
 	"virtual-fleet-management/pkg/http"
 	"virtual-fleet-management/pkg/scenario"
+
+	openapi "github.com/bringauto/fleet-management-http-client-go"
 )
 
 type OrderManager struct {

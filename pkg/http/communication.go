@@ -2,11 +2,12 @@ package http
 
 import (
 	"context"
-	openapi "github.com/bringauto/fleet-management-http-client-go"
 	"log"
 	"net/http"
 	"net/url"
 	"time"
+
+	openapi "github.com/bringauto/fleet-management-http-client-go"
 )
 
 const sleepTime = 5
@@ -18,7 +19,7 @@ type Client struct {
 }
 
 // createConfiguration Create configuration for client
-func createConfiguration(host string) *openapi.Configuration {
+func createConfiguration(host string, company string) *openapi.Configuration {
 	u, err := url.Parse(host)
 	if err != nil {
 		log.Fatal("[ERROR] ", err)
@@ -26,12 +27,13 @@ func createConfiguration(host string) *openapi.Configuration {
 	config := openapi.NewConfiguration()
 	config.Host = u.Host
 	config.Scheme = u.Scheme
+	config.AddDefaultHeader("Cookie", "tenant="+company)
 	return config
 }
 
 // CreateClient Create client for communication with server
-func CreateClient(host string, key string) *Client {
-	apiClient := openapi.NewAPIClient(createConfiguration(host))
+func CreateClient(host string, key string, company string) *Client {
+	apiClient := openapi.NewAPIClient(createConfiguration(host, company))
 
 	auth := context.WithValue(
 		context.Background(),
