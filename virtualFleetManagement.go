@@ -29,7 +29,7 @@ func main() {
 	allScenarios := scenario.GetAllScenariosFromDir(config.ScenariosPath)
 	client := http.CreateClient(config.HostIp, config.ApiKey)
 
-	client.SetTennantCookies(config.Company)
+	client.SetTenantCookies(config.Company)
 
 	simulations := createSimulations(allScenarios, config.Loop, client)
 

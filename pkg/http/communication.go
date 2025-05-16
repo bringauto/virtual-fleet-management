@@ -169,7 +169,7 @@ func (c *Client) GetTenants() []openapi.Tenant {
 	return tenants
 }
 
-func (c *Client) SetTennantCookies(tenantName string) {
+func (c *Client) SetTenantCookies(tenantName string) {
 	tenants := c.GetTenants()
 	log.Printf("[INFO] Found %d tenants", len(tenants))
 	if len(tenants) <= 0 {
@@ -194,7 +194,8 @@ func (c *Client) SetTennantCookies(tenantName string) {
 			for _, cookie := range cookies {
 				log.Printf("[INFO] Setting tenant cookie: %s=%s", cookie.Name, cookie.Value)
 			}
-			break
+			return
 		}
 	}
+	log.Fatal("[ERROR] Tenant '%s' not found.", tenantName)
 }
