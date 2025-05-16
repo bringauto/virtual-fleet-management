@@ -20,7 +20,7 @@ type Client struct {
 }
 
 // createConfiguration Create configuration for client
-func createConfiguration(host string, company string) *openapi.Configuration {
+func createConfiguration(host string) *openapi.Configuration {
 	u, err := url.Parse(host)
 	if err != nil {
 		log.Fatal("[ERROR] ", err)
@@ -42,8 +42,8 @@ func createConfiguration(host string, company string) *openapi.Configuration {
 }
 
 // CreateClient Create client for communication with server
-func CreateClient(host string, key string, company string) *Client {
-	apiClient := openapi.NewAPIClient(createConfiguration(host, company))
+func CreateClient(host string, key string) *Client {
+	apiClient := openapi.NewAPIClient(createConfiguration(host))
 
 	auth := context.WithValue(
 		context.Background(),

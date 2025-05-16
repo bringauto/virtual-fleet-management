@@ -27,7 +27,7 @@ func main() {
 	setSignalHandler()
 
 	allScenarios := scenario.GetAllScenariosFromDir(config.ScenariosPath)
-	client := http.CreateClient(config.HostIp, config.ApiKey, config.Company)
+	client := http.CreateClient(config.HostIp, config.ApiKey)
 
 	client.SetTennantCookies(config.Company)
 
