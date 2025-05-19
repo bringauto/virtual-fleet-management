@@ -1,12 +1,13 @@
 package simulation
 
 import (
-	openapi "github.com/bringauto/fleet-management-http-client-go"
 	"log"
 	"math"
 	"reflect"
 	"virtual-fleet-management/pkg/http"
 	"virtual-fleet-management/pkg/scenario"
+
+	openapi "github.com/bringauto/fleet-management-http-client-go"
 )
 
 const gpsEqualityThreshold = 1e-6

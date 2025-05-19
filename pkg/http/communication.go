@@ -2,11 +2,13 @@ package http
 
 import (
 	"context"
-	openapi "github.com/bringauto/fleet-management-http-client-go"
 	"log"
 	"net/http"
+	"net/http/cookiejar"
 	"net/url"
 	"time"
+
+	openapi "github.com/bringauto/fleet-management-http-client-go"
 )
 
 const sleepTime = 5
@@ -23,9 +25,19 @@ func createConfiguration(host string) *openapi.Configuration {
 	if err != nil {
 		log.Fatal("[ERROR] ", err)
 	}
+
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		log.Fatal("[ERROR] Failed to create cookie jar: ", err)
+	}
+	httpClient := &http.Client{
+		Jar: jar,
+	}
+
 	config := openapi.NewConfiguration()
 	config.Host = u.Host
 	config.Scheme = u.Scheme
+	config.HTTPClient = httpClient
 	return config
 }
 
@@ -147,4 +159,43 @@ func (c *Client) CancelOrders(orderIds []int32) {
 	if err != nil && r != nil && r.StatusCode != http.StatusOK { // openapi puts error o parsing response. The response is not needed, so it is ignored
 		log.Fatal(`[ERROR] cancelling order with 'OrderStateAPI.CreateOrderStates': `, r.Status, err)
 	}
+}
+
+func (c *Client) GetTenants() []openapi.Tenant {
+	tenants, _, err := c.apiClient.TenantAPI.GetTenants(c.auth).Execute()
+	if err != nil {
+		log.Fatal(`[ERROR] calling 'TenantAPI.GetTenants': `, err)
+	}
+	return tenants
+}
+
+func (c *Client) SetTenantCookies(tenantName string) {
+	tenants := c.GetTenants()
+	log.Printf("[INFO] Found %d tenants", len(tenants))
+	if len(tenants) <= 0 {
+		log.Printf("[INFO] No tenants found. Creating a new one.")
+		tenant := []openapi.Tenant{*openapi.NewTenant(tenantName)}
+		_, r, err := c.apiClient.TenantAPI.CreateTenants(c.auth).Tenant(tenant).Execute()
+		if err != nil && r != nil && r.StatusCode != http.StatusOK {
+			log.Fatal(`[ERROR] calling 'TenantAPI.CreateTenants': `, r.Status, err)
+		}
+		tenants = c.GetTenants()
+		if len(tenants) <= 0 {
+			log.Fatal("[ERROR] No tenants found after creating a new one.")
+		}
+	}
+	for _, tenant := range tenants {
+		if tenant.Name == tenantName {
+			setCookie, err := c.apiClient.TenantAPI.SetTenantCookie(c.auth, *tenant.Id).Execute()
+			if err != nil {
+				log.Fatal(`[ERROR] calling 'TenantAPI.SetTenantCookie': `, err)
+			}
+			cookies := c.apiClient.GetConfig().HTTPClient.Jar.Cookies(setCookie.Request.URL)
+			for _, cookie := range cookies {
+				log.Printf("[INFO] Setting tenant cookie: %s=%s", cookie.Name, cookie.Value)
+			}
+			return
+		}
+	}
+	log.Fatal("[ERROR] Tenant '%s' not found.", tenantName)
 }

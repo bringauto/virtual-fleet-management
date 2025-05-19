@@ -190,6 +190,7 @@ Run the app:
 
 * **host** - address of the server where the virtual fleet will be running
 * **api-key** - API key for the Fleet Management HTTP API
+* **company** - Company name that will be used as tenant in request authorization
 * **scenario-dir** - path to the directory with scenarios. `<scenario_dir>/<car_name>/scenario.json`
     * common approach is to name the scenario directory as company
     * inside the `scenario-dir`, there can be directories for multiple cars, all of them can be played at same time.
